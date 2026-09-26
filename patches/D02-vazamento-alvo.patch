@@ -1,0 +1,21 @@
+diff --git a/src/sentinela/features.py b/src/sentinela/features.py
+index f3fcede..b808c10 100644
+--- a/src/sentinela/features.py
++++ b/src/sentinela/features.py
+@@ -48,12 +48,11 @@ def risco_congelado() -> dict[str, float]:
+ def _risco_por_maquina(df: pd.DataFrame) -> pd.Series:
+     """Risco histórico do motor, usado como atributo categórico numérico.
+ 
+-    Quando o lote já vem rotulado, recalculamos o risco no próprio lote para
+-    refletir o comportamento mais recente da planta; sem rótulo, caímos na
+-    tabela congelada.
++    SEMPRE a tabela congelada. O ramo que recalculava o risco a partir de
++    `falha_72h` quando o lote vinha rotulado punha o gabarito dentro da
++    entrada (D02): em serving a coluna não existe, então a feature valia uma
++    coisa na avaliação e outra em produção.
+     """
+-    if "falha_72h" in df.columns:
+-        return df.groupby("id_maquina")["falha_72h"].transform("mean").astype(float)
+     congelado = risco_congelado()
+     padrao = sum(congelado.values()) / len(congelado)
+     return df["id_maquina"].map(congelado).fillna(padrao).astype(float)

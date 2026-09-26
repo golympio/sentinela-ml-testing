@@ -1,0 +1,2514 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+SUT: /opt/sentinela @ c9020d7ba3bb4e6fd4ae22d46346a787b16adc02 (sentinela 1.0.0)
+versões: numpy=2.5.3 pandas=2.3.3 pytest=9.1.1 scipy=1.18.1
+SUITE_SEED=42 SUITE_N_BOOT=2000
+rootdir: /trabalho
+configfile: pyproject.toml
+testpaths: tests
+plugins: hypothesis-6.168.1
+collected 231 items / 170 deselected / 61 selected
+
+tests/test_adversarial.py FFFFFFFFFFFF                                   [ 19%]
+tests/test_adversarial_limites.py FFFFF                                  [ 27%]
+tests/test_contrato_dados.py FFFF                                        [ 34%]
+tests/test_estatistico_drift.py F                                        [ 36%]
+tests/test_estatistico_limiar_calibracao.py FFFFFFFFF                    [ 50%]
+tests/test_estatistico_v1_v2.py FF                                       [ 54%]
+tests/test_features.py FFFFFFF                                           [ 65%]
+tests/test_modelo_contrato.py FF                                         [ 68%]
+tests/test_pipeline_e2e.py F                                             [ 70%]
+tests/test_preprocessamento.py FFFFFFFFFF                                [ 86%]
+tests/test_reprodutibilidade.py F                                        [ 88%]
+tests/test_vazamento_alvo.py FFFFFFF                                     [100%]
+
+=================================== FAILURES ===================================
+_____ test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao[0.1] _____
+
+amplitude = 0.1
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D14 — a decisão muda com perturbação abaixo do ruído de ±1,0 °C do sensor",
+    )
+    @pytest.mark.parametrize("amplitude", AMPLITUDES_SUB_RUIDO)
+    def test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao(
+        amplitude, _tabela_de_flip
+    ):
+        """Abaixo do ruído do sensor, a decisão **não pode** mudar — em nenhuma das versões.
+    
+        O oráculo é a taxa de flip **zero**, e não "pequena": duas leituras que o sensor não
+        distingue têm de produzir a mesma ordem de manutenção. Uma taxa de 0,3 % parece
+        desprezível num slide e não é: com 4.200 leituras por lote, são doze motores cuja ordem
+        depende do erro de medição, e não do estado do motor.
+        """
+        _, _, tabela = _tabela_de_flip
+    
+        culpadas = {v: tabela[v][amplitude] for v in VERSOES if tabela[v][amplitude]["taxa"] > 0}
+        detalhe = "; ".join(
+            f"{v}: {f['taxa'] * 100:.4f}% ({f['para_cima'] + f['para_baixo']} decisões — "
+            f"{f['para_cima']} para cima, {f['para_baixo']} para baixo)"
+            for v, f in culpadas.items()
+        )
+>       assert not culpadas, (
+            f"perturbação de ±{amplitude} °C — {amplitude / ficha.RUIDO_TEMPERATURA_C:.0%} do "
+            f"ruído declarado de ±{ficha.RUIDO_TEMPERATURA_C} °C — mudou decisões: {detalhe}"
+        )
+E       AssertionError: perturbação de ±0.1 °C — 10% do ruído declarado de ±1.0 °C — mudou decisões: v1: 0.2857% (12 decisões — 12 para cima, 0 para baixo); v2: 0.4286% (18 decisões — 10 para cima, 8 para baixo)
+E       assert not {'v1': {'taxa': 0.002857142857142857, 'para_cima': 12, 'para_baixo': 0}, 'v2': {'taxa': 0.004285714285714286, 'para_cima': 10, 'para_baixo': 8}}
+
+tests/test_adversarial.py:104: AssertionError
+_____ test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao[0.2] _____
+
+amplitude = 0.2
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D14 — a decisão muda com perturbação abaixo do ruído de ±1,0 °C do sensor",
+    )
+    @pytest.mark.parametrize("amplitude", AMPLITUDES_SUB_RUIDO)
+    def test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao(
+        amplitude, _tabela_de_flip
+    ):
+        """Abaixo do ruído do sensor, a decisão **não pode** mudar — em nenhuma das versões.
+    
+        O oráculo é a taxa de flip **zero**, e não "pequena": duas leituras que o sensor não
+        distingue têm de produzir a mesma ordem de manutenção. Uma taxa de 0,3 % parece
+        desprezível num slide e não é: com 4.200 leituras por lote, são doze motores cuja ordem
+        depende do erro de medição, e não do estado do motor.
+        """
+        _, _, tabela = _tabela_de_flip
+    
+        culpadas = {v: tabela[v][amplitude] for v in VERSOES if tabela[v][amplitude]["taxa"] > 0}
+        detalhe = "; ".join(
+            f"{v}: {f['taxa'] * 100:.4f}% ({f['para_cima'] + f['para_baixo']} decisões — "
+            f"{f['para_cima']} para cima, {f['para_baixo']} para baixo)"
+            for v, f in culpadas.items()
+        )
+>       assert not culpadas, (
+            f"perturbação de ±{amplitude} °C — {amplitude / ficha.RUIDO_TEMPERATURA_C:.0%} do "
+            f"ruído declarado de ±{ficha.RUIDO_TEMPERATURA_C} °C — mudou decisões: {detalhe}"
+        )
+E       AssertionError: perturbação de ±0.2 °C — 20% do ruído declarado de ±1.0 °C — mudou decisões: v1: 0.5714% (24 decisões — 17 para cima, 7 para baixo); v2: 1.0476% (44 decisões — 25 para cima, 19 para baixo)
+E       assert not {'v1': {'taxa': 0.005714285714285714, 'para_cima': 17, 'para_baixo': 7}, 'v2': {'taxa': 0.010476190476190476, 'para_cima': 25, 'para_baixo': 19}}
+
+tests/test_adversarial.py:104: AssertionError
+_____ test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao[0.4] _____
+
+amplitude = 0.4
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D14 — a decisão muda com perturbação abaixo do ruído de ±1,0 °C do sensor",
+    )
+    @pytest.mark.parametrize("amplitude", AMPLITUDES_SUB_RUIDO)
+    def test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao(
+        amplitude, _tabela_de_flip
+    ):
+        """Abaixo do ruído do sensor, a decisão **não pode** mudar — em nenhuma das versões.
+    
+        O oráculo é a taxa de flip **zero**, e não "pequena": duas leituras que o sensor não
+        distingue têm de produzir a mesma ordem de manutenção. Uma taxa de 0,3 % parece
+        desprezível num slide e não é: com 4.200 leituras por lote, são doze motores cuja ordem
+        depende do erro de medição, e não do estado do motor.
+        """
+        _, _, tabela = _tabela_de_flip
+    
+        culpadas = {v: tabela[v][amplitude] for v in VERSOES if tabela[v][amplitude]["taxa"] > 0}
+        detalhe = "; ".join(
+            f"{v}: {f['taxa'] * 100:.4f}% ({f['para_cima'] + f['para_baixo']} decisões — "
+            f"{f['para_cima']} para cima, {f['para_baixo']} para baixo)"
+            for v, f in culpadas.items()
+        )
+>       assert not culpadas, (
+            f"perturbação de ±{amplitude} °C — {amplitude / ficha.RUIDO_TEMPERATURA_C:.0%} do "
+            f"ruído declarado de ±{ficha.RUIDO_TEMPERATURA_C} °C — mudou decisões: {detalhe}"
+        )
+E       AssertionError: perturbação de ±0.4 °C — 40% do ruído declarado de ±1.0 °C — mudou decisões: v1: 1.0238% (43 decisões — 28 para cima, 15 para baixo); v2: 1.2381% (52 decisões — 29 para cima, 23 para baixo)
+E       assert not {'v1': {'taxa': 0.010238095238095239, 'para_cima': 28, 'para_baixo': 15}, 'v2': {'taxa': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}}
+
+tests/test_adversarial.py:104: AssertionError
+__________________ test_v2_nao_e_mais_instavel_que_a_v1[0.1] ___________________
+
+amplitude = 0.1
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D14 — a v2 vira mais decisões que a v1 sob a mesma perturbação sub-ruído",
+    )
+    @pytest.mark.parametrize("amplitude", AMPLITUDES_SUB_RUIDO)
+    def test_v2_nao_e_mais_instavel_que_a_v1(amplitude, _tabela_de_flip):
+        """A v2, que a Nortemec quer promover, não pode ser mais sensível ao erro do sensor.
+    
+        A v2 é a floresta mais profunda: mais cortes, mais fronteiras de decisão, e portanto
+        mais chance de que uma delas passe dentro do erro de medição. Promover um modelo que
+        troca robustez por acurácia é exatamente a decisão que o Bloco B já mostrou ter sido
+        tomada com o instrumento errado — aqui ela aparece por um terceiro eixo.
+        """
+        _, _, tabela = _tabela_de_flip
+        v1, v2 = tabela["v1"][amplitude], tabela["v2"][amplitude]
+    
+>       assert v2["taxa"] <= v1["taxa"], (
+            f"a ±{amplitude} °C a v2 vira {v2['taxa'] * 100:.4f}% das decisões contra "
+            f"{v1['taxa'] * 100:.4f}% da v1 — {v2['taxa'] / v1['taxa']:.2f}× mais instável "
+            f"(v2: {v2['para_cima']}↑/{v2['para_baixo']}↓; v1: {v1['para_cima']}↑/"
+            f"{v1['para_baixo']}↓)"
+        )
+E       AssertionError: a ±0.1 °C a v2 vira 0.4286% das decisões contra 0.2857% da v1 — 1.50× mais instável (v2: 10↑/8↓; v1: 12↑/0↓)
+E       assert 0.004285714285714286 <= 0.002857142857142857
+
+tests/test_adversarial.py:177: AssertionError
+__________________ test_v2_nao_e_mais_instavel_que_a_v1[0.2] ___________________
+
+amplitude = 0.2
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D14 — a v2 vira mais decisões que a v1 sob a mesma perturbação sub-ruído",
+    )
+    @pytest.mark.parametrize("amplitude", AMPLITUDES_SUB_RUIDO)
+    def test_v2_nao_e_mais_instavel_que_a_v1(amplitude, _tabela_de_flip):
+        """A v2, que a Nortemec quer promover, não pode ser mais sensível ao erro do sensor.
+    
+        A v2 é a floresta mais profunda: mais cortes, mais fronteiras de decisão, e portanto
+        mais chance de que uma delas passe dentro do erro de medição. Promover um modelo que
+        troca robustez por acurácia é exatamente a decisão que o Bloco B já mostrou ter sido
+        tomada com o instrumento errado — aqui ela aparece por um terceiro eixo.
+        """
+        _, _, tabela = _tabela_de_flip
+        v1, v2 = tabela["v1"][amplitude], tabela["v2"][amplitude]
+    
+>       assert v2["taxa"] <= v1["taxa"], (
+            f"a ±{amplitude} °C a v2 vira {v2['taxa'] * 100:.4f}% das decisões contra "
+            f"{v1['taxa'] * 100:.4f}% da v1 — {v2['taxa'] / v1['taxa']:.2f}× mais instável "
+            f"(v2: {v2['para_cima']}↑/{v2['para_baixo']}↓; v1: {v1['para_cima']}↑/"
+            f"{v1['para_baixo']}↓)"
+        )
+E       AssertionError: a ±0.2 °C a v2 vira 1.0476% das decisões contra 0.5714% da v1 — 1.83× mais instável (v2: 25↑/19↓; v1: 17↑/7↓)
+E       assert 0.010476190476190476 <= 0.005714285714285714
+
+tests/test_adversarial.py:177: AssertionError
+__________________ test_v2_nao_e_mais_instavel_que_a_v1[0.4] ___________________
+
+amplitude = 0.4
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D14 — a v2 vira mais decisões que a v1 sob a mesma perturbação sub-ruído",
+    )
+    @pytest.mark.parametrize("amplitude", AMPLITUDES_SUB_RUIDO)
+    def test_v2_nao_e_mais_instavel_que_a_v1(amplitude, _tabela_de_flip):
+        """A v2, que a Nortemec quer promover, não pode ser mais sensível ao erro do sensor.
+    
+        A v2 é a floresta mais profunda: mais cortes, mais fronteiras de decisão, e portanto
+        mais chance de que uma delas passe dentro do erro de medição. Promover um modelo que
+        troca robustez por acurácia é exatamente a decisão que o Bloco B já mostrou ter sido
+        tomada com o instrumento errado — aqui ela aparece por um terceiro eixo.
+        """
+        _, _, tabela = _tabela_de_flip
+        v1, v2 = tabela["v1"][amplitude], tabela["v2"][amplitude]
+    
+>       assert v2["taxa"] <= v1["taxa"], (
+            f"a ±{amplitude} °C a v2 vira {v2['taxa'] * 100:.4f}% das decisões contra "
+            f"{v1['taxa'] * 100:.4f}% da v1 — {v2['taxa'] / v1['taxa']:.2f}× mais instável "
+            f"(v2: {v2['para_cima']}↑/{v2['para_baixo']}↓; v1: {v1['para_cima']}↑/"
+            f"{v1['para_baixo']}↓)"
+        )
+E       AssertionError: a ±0.4 °C a v2 vira 1.2381% das decisões contra 1.0238% da v1 — 1.21× mais instável (v2: 29↑/23↓; v1: 28↑/15↓)
+E       assert 0.012380952380952381 <= 0.010238095238095239
+
+tests/test_adversarial.py:177: AssertionError
+_______________ test_trocar_o_operador_senior_nao_muda_a_decisao _______________
+
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D06 — trocar o técnico de plantão, sem tocar em sensor, faz alarme sumir",
+    )
+    def test_trocar_o_operador_senior_nao_muda_a_decisao(_tabela_de_flip, medicoes):
+        """Trocar OP-07 por OP-03, com todos os sensores bit-idênticos, não pode mudar nada.
+    
+        `operador_senior` marca o técnico que a manutenção **escalou** para o motor. O próprio
+        comentário do SUT entrega a causa: "o técnico sênior (OP-07) é escalado para os motores
+        mais críticos da planta". Isso não é uma propriedade do motor — é o registro de que
+        **alguém já suspeitou da falha**. Um modelo que se apoia nisso não prevê a falha: ele
+        detecta que a organização já a percebeu, e some quando a organização ainda não percebeu,
+        que é exatamente o caso em que a previsão valeria alguma coisa.
+    
+        O contrafactual é fisicamente coerente: mesmo motor, mesmas leituras, outro técnico de
+        plantão. Nada no equipamento mudou.
+        """
+        limpo, base, _ = _tabela_de_flip
+        alvo = limpo["id_operador"] == "OP-07"
+    
+        trocado = perturbacao.contrafactual(
+            limpo, "id_operador", limpo["id_operador"].where(~alvo, "OP-03")
+        )
+        sensores = ["temperatura_c", "vibracao_rms", "pressao", "corrente_a", "rpm",
+                    "horas_operacao", "idade_equipamento_meses"]
+        assert all(limpo[c].equals(trocado[c]) for c in sensores), (
+            "o contrafactual mexeu em algum sensor — deixaria de ser contrafactual"
+        )
+    
+        flip = _flip_por_versao(limpo, base, trocado)
+    
+        # A taxa de falha por operador é o confundidor, e entra na evidência mesmo quando o
+        # assert abaixo derruba o teste — por isso é gravada ANTES dele.
+        por_operador = limpo.groupby("id_operador")["falha_72h"].mean().round(6)
+        medicoes.setdefault("contrafactual", {})["operador"] = flip
+        medicoes["contrafactual"]["taxa_falha_por_operador"] = {
+            str(k): float(v) for k, v in por_operador.items()
+        }
+    
+        n = int(alvo.sum())
+        detalhe = "; ".join(
+            f"{v}: {f['para_cima'] + f['para_baixo']} decisões ({f['para_cima']}↑/"
+            f"{f['para_baixo']}↓) — {(f['para_cima'] + f['para_baixo']) / n:.2%} das linhas de OP-07"
+            for v, f in flip.items()
+        )
+>       assert all(f["taxa"] == 0 for f in flip.values()), (
+            f"trocar OP-07 por OP-03 em {n} leituras, sem tocar em nenhum sensor, mudou: "
+            f"{detalhe}. Taxa de falha observada: OP-07 {por_operador['OP-07']:.4f} contra "
+            f"{por_operador.drop('OP-07').mean():.4f} na média dos outros onze"
+        )
+E       AssertionError: trocar OP-07 por OP-03 em 1008 leituras, sem tocar em nenhum sensor, mudou: v1: 57 decisões (0↑/57↓) — 5.65% das linhas de OP-07; v2: 155 decisões (0↑/155↓) — 15.38% das linhas de OP-07. Taxa de falha observada: OP-07 0.3988 contra 0.0794 na média dos outros onze
+E       assert False
+E        +  where False = all(<generator object test_trocar_o_operador_senior_nao_muda_a_decisao.<locals>.<genexpr> at 0xfc390b172dc0>)
+
+tests/test_adversarial.py:304: AssertionError
+__________________ test_trocar_o_turno_nao_muda_a_decisao[1] ___________________
+
+destino = 1
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D24 — `turno` é função da hora do timestamp e ainda assim move a decisão: "
+               "até 10 flips sem confundidor (faixa de 0,71 p.p. entre turnos)",
+    )
+    @pytest.mark.parametrize("destino", (1, 2, 3))
+    def test_trocar_o_turno_nao_muda_a_decisao(destino, _tabela_de_flip, medicoes):
+        """Reetiquetar o turno, com todos os sensores bit-idênticos, não pode mudar nada.
+    
+        `turno` é a 13ª feature de `ORDEM_FEATURES`, e é a única das treze que nunca teve teste
+        nem exclusão justificada. O guia do aluno fecha o bullet dos contrafactuais com *"quais
+        campos entram nessa categoria?"* — e este é o caso mais limpo de todos, porque a resposta
+        é verificável dentro do próprio dado em vez de depender de um argumento causal.
+    
+        **`turno` é função determinística da hora do `timestamp`**: 0–7 → 1, 8–15 → 2, 16–23 → 3,
+        sem uma exceção em 4.200 linhas (o assert de premissa abaixo mede isso e derruba o teste
+        se deixar de valer). Ou seja, a coluna é uma **reetiquetagem do relógio** — não traz um
+        bit de informação física que o timestamp já não trouxesse, e o timestamp o modelo já usa
+        para montar as janelas móveis. Um motor não falha porque é o turno 2.
+    
+        O contraste com D06 é o que dá peso ao achado. Lá havia um confundidor forte e medido:
+        OP-07 falha 0,3988 contra 0,0794 dos outros, então era *explicável* que o modelo se
+        apoiasse nele — errado, mas explicável. Aqui a taxa de falha é praticamente plana entre
+        os turnos (0,1600 / 0,1550 / 0,1529, uma faixa de 0,71 p.p.), e mesmo assim a decisão se
+        move. Não há sinal para o modelo estar lendo: ele está lendo ruído de uma coluna
+        redundante.
+    
+        O contrafactual mexe **só** em `turno` e deixa o `timestamp` intacto de propósito. Isso
+        produz uma linha que a planta não emitiria — e essa é a segunda leitura do mesmo achado:
+        nada no serving percebe a incoerência, na mesma família de D21.
+        """
+        limpo, base, _ = _tabela_de_flip
+    
+        hora = pd.to_datetime(limpo["timestamp"]).dt.hour
+        ambiguas = int((limpo.groupby(hora)["turno"].nunique() > 1).sum())
+        assert ambiguas == 0, (
+            f"premissa do oráculo quebrada: {ambiguas} horas do dia mapeiam para mais de um "
+            f"turno. Se `turno` deixou de ser função da hora, ele pode carregar informação "
+            f"própria e este contrafactual precisa ser redesenhado"
+        )
+    
+        alvo = limpo["turno"] != destino
+        trocado = perturbacao.contrafactual(
+            limpo, "turno", limpo["turno"].where(~alvo, destino)
+        )
+        sensores = ["temperatura_c", "vibracao_rms", "pressao", "corrente_a", "rpm",
+                    "horas_operacao", "idade_equipamento_meses"]
+        assert all(limpo[c].equals(trocado[c]) for c in sensores), (
+            "o contrafactual mexeu em algum sensor — deixaria de ser contrafactual"
+        )
+    
+        flip = _flip_por_versao(limpo, base, trocado)
+    
+        por_turno = limpo.groupby("turno")["falha_72h"].mean().round(6)
+        medicoes.setdefault("contrafactual", {}).setdefault("turno", {})[str(destino)] = flip
+        medicoes["contrafactual"]["taxa_falha_por_turno"] = {
+            str(k): float(v) for k, v in por_turno.items()
+        }
+    
+        n = int(alvo.sum())
+        detalhe = "; ".join(
+            f"{v}: {f['para_cima'] + f['para_baixo']} decisões "
+            f"({f['para_cima']}↑/{f['para_baixo']}↓)"
+            for v, f in flip.items()
+        )
+        faixa = por_turno.max() - por_turno.min()
+>       assert all(f["taxa"] == 0 for f in flip.values()), (
+            f"reetiquetar {n} leituras para o turno {destino}, sem tocar em nenhum sensor e "
+            f"sem mexer no timestamp, mudou: {detalhe}. E `turno` é função da hora do "
+            f"timestamp, logo não traz informação física nova. Taxa de falha por turno: "
+            f"{por_turno.to_dict()} — faixa de apenas {faixa:.4f} ({faixa * 100:.2f} p.p.), "
+            f"sem confundidor que explique a dependência"
+        )
+E       AssertionError: reetiquetar 2800 leituras para o turno 1, sem tocar em nenhum sensor e sem mexer no timestamp, mudou: v1: 3 decisões (1↑/2↓); v2: 8 decisões (6↑/2↓). E `turno` é função da hora do timestamp, logo não traz informação física nova. Taxa de falha por turno: {1: 0.16, 2: 0.155, 3: 0.152857} — faixa de apenas 0.0071 (0.71 p.p.), sem confundidor que explique a dependência
+E       assert False
+E        +  where False = all(<generator object test_trocar_o_turno_nao_muda_a_decisao.<locals>.<genexpr> at 0xfc390b554380>)
+
+tests/test_adversarial.py:382: AssertionError
+__________________ test_trocar_o_turno_nao_muda_a_decisao[2] ___________________
+
+destino = 2
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D24 — `turno` é função da hora do timestamp e ainda assim move a decisão: "
+               "até 10 flips sem confundidor (faixa de 0,71 p.p. entre turnos)",
+    )
+    @pytest.mark.parametrize("destino", (1, 2, 3))
+    def test_trocar_o_turno_nao_muda_a_decisao(destino, _tabela_de_flip, medicoes):
+        """Reetiquetar o turno, com todos os sensores bit-idênticos, não pode mudar nada.
+    
+        `turno` é a 13ª feature de `ORDEM_FEATURES`, e é a única das treze que nunca teve teste
+        nem exclusão justificada. O guia do aluno fecha o bullet dos contrafactuais com *"quais
+        campos entram nessa categoria?"* — e este é o caso mais limpo de todos, porque a resposta
+        é verificável dentro do próprio dado em vez de depender de um argumento causal.
+    
+        **`turno` é função determinística da hora do `timestamp`**: 0–7 → 1, 8–15 → 2, 16–23 → 3,
+        sem uma exceção em 4.200 linhas (o assert de premissa abaixo mede isso e derruba o teste
+        se deixar de valer). Ou seja, a coluna é uma **reetiquetagem do relógio** — não traz um
+        bit de informação física que o timestamp já não trouxesse, e o timestamp o modelo já usa
+        para montar as janelas móveis. Um motor não falha porque é o turno 2.
+    
+        O contraste com D06 é o que dá peso ao achado. Lá havia um confundidor forte e medido:
+        OP-07 falha 0,3988 contra 0,0794 dos outros, então era *explicável* que o modelo se
+        apoiasse nele — errado, mas explicável. Aqui a taxa de falha é praticamente plana entre
+        os turnos (0,1600 / 0,1550 / 0,1529, uma faixa de 0,71 p.p.), e mesmo assim a decisão se
+        move. Não há sinal para o modelo estar lendo: ele está lendo ruído de uma coluna
+        redundante.
+    
+        O contrafactual mexe **só** em `turno` e deixa o `timestamp` intacto de propósito. Isso
+        produz uma linha que a planta não emitiria — e essa é a segunda leitura do mesmo achado:
+        nada no serving percebe a incoerência, na mesma família de D21.
+        """
+        limpo, base, _ = _tabela_de_flip
+    
+        hora = pd.to_datetime(limpo["timestamp"]).dt.hour
+        ambiguas = int((limpo.groupby(hora)["turno"].nunique() > 1).sum())
+        assert ambiguas == 0, (
+            f"premissa do oráculo quebrada: {ambiguas} horas do dia mapeiam para mais de um "
+            f"turno. Se `turno` deixou de ser função da hora, ele pode carregar informação "
+            f"própria e este contrafactual precisa ser redesenhado"
+        )
+    
+        alvo = limpo["turno"] != destino
+        trocado = perturbacao.contrafactual(
+            limpo, "turno", limpo["turno"].where(~alvo, destino)
+        )
+        sensores = ["temperatura_c", "vibracao_rms", "pressao", "corrente_a", "rpm",
+                    "horas_operacao", "idade_equipamento_meses"]
+        assert all(limpo[c].equals(trocado[c]) for c in sensores), (
+            "o contrafactual mexeu em algum sensor — deixaria de ser contrafactual"
+        )
+    
+        flip = _flip_por_versao(limpo, base, trocado)
+    
+        por_turno = limpo.groupby("turno")["falha_72h"].mean().round(6)
+        medicoes.setdefault("contrafactual", {}).setdefault("turno", {})[str(destino)] = flip
+        medicoes["contrafactual"]["taxa_falha_por_turno"] = {
+            str(k): float(v) for k, v in por_turno.items()
+        }
+    
+        n = int(alvo.sum())
+        detalhe = "; ".join(
+            f"{v}: {f['para_cima'] + f['para_baixo']} decisões "
+            f"({f['para_cima']}↑/{f['para_baixo']}↓)"
+            for v, f in flip.items()
+        )
+        faixa = por_turno.max() - por_turno.min()
+>       assert all(f["taxa"] == 0 for f in flip.values()), (
+            f"reetiquetar {n} leituras para o turno {destino}, sem tocar em nenhum sensor e "
+            f"sem mexer no timestamp, mudou: {detalhe}. E `turno` é função da hora do "
+            f"timestamp, logo não traz informação física nova. Taxa de falha por turno: "
+            f"{por_turno.to_dict()} — faixa de apenas {faixa:.4f} ({faixa * 100:.2f} p.p.), "
+            f"sem confundidor que explique a dependência"
+        )
+E       AssertionError: reetiquetar 2800 leituras para o turno 2, sem tocar em nenhum sensor e sem mexer no timestamp, mudou: v1: 1 decisões (1↑/0↓); v2: 10 decisões (3↑/7↓). E `turno` é função da hora do timestamp, logo não traz informação física nova. Taxa de falha por turno: {1: 0.16, 2: 0.155, 3: 0.152857} — faixa de apenas 0.0071 (0.71 p.p.), sem confundidor que explique a dependência
+E       assert False
+E        +  where False = all(<generator object test_trocar_o_turno_nao_muda_a_decisao.<locals>.<genexpr> at 0xfc390b225cb0>)
+
+tests/test_adversarial.py:382: AssertionError
+__________________ test_trocar_o_turno_nao_muda_a_decisao[3] ___________________
+
+destino = 3
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D24 — `turno` é função da hora do timestamp e ainda assim move a decisão: "
+               "até 10 flips sem confundidor (faixa de 0,71 p.p. entre turnos)",
+    )
+    @pytest.mark.parametrize("destino", (1, 2, 3))
+    def test_trocar_o_turno_nao_muda_a_decisao(destino, _tabela_de_flip, medicoes):
+        """Reetiquetar o turno, com todos os sensores bit-idênticos, não pode mudar nada.
+    
+        `turno` é a 13ª feature de `ORDEM_FEATURES`, e é a única das treze que nunca teve teste
+        nem exclusão justificada. O guia do aluno fecha o bullet dos contrafactuais com *"quais
+        campos entram nessa categoria?"* — e este é o caso mais limpo de todos, porque a resposta
+        é verificável dentro do próprio dado em vez de depender de um argumento causal.
+    
+        **`turno` é função determinística da hora do `timestamp`**: 0–7 → 1, 8–15 → 2, 16–23 → 3,
+        sem uma exceção em 4.200 linhas (o assert de premissa abaixo mede isso e derruba o teste
+        se deixar de valer). Ou seja, a coluna é uma **reetiquetagem do relógio** — não traz um
+        bit de informação física que o timestamp já não trouxesse, e o timestamp o modelo já usa
+        para montar as janelas móveis. Um motor não falha porque é o turno 2.
+    
+        O contraste com D06 é o que dá peso ao achado. Lá havia um confundidor forte e medido:
+        OP-07 falha 0,3988 contra 0,0794 dos outros, então era *explicável* que o modelo se
+        apoiasse nele — errado, mas explicável. Aqui a taxa de falha é praticamente plana entre
+        os turnos (0,1600 / 0,1550 / 0,1529, uma faixa de 0,71 p.p.), e mesmo assim a decisão se
+        move. Não há sinal para o modelo estar lendo: ele está lendo ruído de uma coluna
+        redundante.
+    
+        O contrafactual mexe **só** em `turno` e deixa o `timestamp` intacto de propósito. Isso
+        produz uma linha que a planta não emitiria — e essa é a segunda leitura do mesmo achado:
+        nada no serving percebe a incoerência, na mesma família de D21.
+        """
+        limpo, base, _ = _tabela_de_flip
+    
+        hora = pd.to_datetime(limpo["timestamp"]).dt.hour
+        ambiguas = int((limpo.groupby(hora)["turno"].nunique() > 1).sum())
+        assert ambiguas == 0, (
+            f"premissa do oráculo quebrada: {ambiguas} horas do dia mapeiam para mais de um "
+            f"turno. Se `turno` deixou de ser função da hora, ele pode carregar informação "
+            f"própria e este contrafactual precisa ser redesenhado"
+        )
+    
+        alvo = limpo["turno"] != destino
+        trocado = perturbacao.contrafactual(
+            limpo, "turno", limpo["turno"].where(~alvo, destino)
+        )
+        sensores = ["temperatura_c", "vibracao_rms", "pressao", "corrente_a", "rpm",
+                    "horas_operacao", "idade_equipamento_meses"]
+        assert all(limpo[c].equals(trocado[c]) for c in sensores), (
+            "o contrafactual mexeu em algum sensor — deixaria de ser contrafactual"
+        )
+    
+        flip = _flip_por_versao(limpo, base, trocado)
+    
+        por_turno = limpo.groupby("turno")["falha_72h"].mean().round(6)
+        medicoes.setdefault("contrafactual", {}).setdefault("turno", {})[str(destino)] = flip
+        medicoes["contrafactual"]["taxa_falha_por_turno"] = {
+            str(k): float(v) for k, v in por_turno.items()
+        }
+    
+        n = int(alvo.sum())
+        detalhe = "; ".join(
+            f"{v}: {f['para_cima'] + f['para_baixo']} decisões "
+            f"({f['para_cima']}↑/{f['para_baixo']}↓)"
+            for v, f in flip.items()
+        )
+        faixa = por_turno.max() - por_turno.min()
+>       assert all(f["taxa"] == 0 for f in flip.values()), (
+            f"reetiquetar {n} leituras para o turno {destino}, sem tocar em nenhum sensor e "
+            f"sem mexer no timestamp, mudou: {detalhe}. E `turno` é função da hora do "
+            f"timestamp, logo não traz informação física nova. Taxa de falha por turno: "
+            f"{por_turno.to_dict()} — faixa de apenas {faixa:.4f} ({faixa * 100:.2f} p.p.), "
+            f"sem confundidor que explique a dependência"
+        )
+E       AssertionError: reetiquetar 2800 leituras para o turno 3, sem tocar em nenhum sensor e sem mexer no timestamp, mudou: v1: 3 decisões (2↑/1↓); v2: 9 decisões (1↑/8↓). E `turno` é função da hora do timestamp, logo não traz informação física nova. Taxa de falha por turno: {1: 0.16, 2: 0.155, 3: 0.152857} — faixa de apenas 0.0071 (0.71 p.p.), sem confundidor que explique a dependência
+E       assert False
+E        +  where False = all(<generator object test_trocar_o_turno_nao_muda_a_decisao.<locals>.<genexpr> at 0xfc390b989490>)
+
+tests/test_adversarial.py:382: AssertionError
+_______ test_converter_a_pressao_para_a_outra_unidade_nao_muda_a_decisao _______
+
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D03 — a mesma pressão física em psi e em bar produz decisões diferentes",
+    )
+    def test_converter_a_pressao_para_a_outra_unidade_nao_muda_a_decisao(
+        _tabela_de_flip, medicoes
+    ):
+        """A mesma pressão física, reportada em psi ou em bar, tem de dar a mesma decisão.
+    
+        Teste **metamórfico de unidade**, no espírito do Mars Climate Orbiter da aula 3: a
+        transformação preserva a grandeza física e a saída tem de ser invariante a ela.
+        `limpar` normaliza `unidade_pressao` para minúsculas e **nunca a usa para converter**;
+        `construir` consome `pressao` crua. O resultado é que a coluna mistura duas escalas —
+        bar por volta de 3,9 e psi por volta de 56,5 — e a floresta aprendeu a cortar entre
+        elas. Ela não mede pressão: ela detecta o fabricante do CLP.
+        """
+        limpo, base, _ = _tabela_de_flip
+        em_bar = limpo["unidade_pressao"] == "bar"
+    
+        convertido = perturbacao.contrafactual(
+            limpo,
+            "pressao",
+            limpo["pressao"].where(~em_bar, limpo["pressao"] * ficha.FATOR_PSI_POR_BAR),
+        )
+        convertido = perturbacao.contrafactual(
+            convertido, "unidade_pressao", limpo["unidade_pressao"].where(~em_bar, "psi")
+        )
+    
+        flip = _flip_por_versao(limpo, base, convertido)
+        medicoes.setdefault("contrafactual", {})["pressao_unidade"] = flip
+    
+        n = int(em_bar.sum())
+        detalhe = "; ".join(
+            f"{v}: {f['para_cima'] + f['para_baixo']} decisões ({f['para_cima']}↑/{f['para_baixo']}↓)"
+            for v, f in flip.items()
+        )
+>       assert all(f["taxa"] == 0 for f in flip.values()), (
+            f"converter {n} leituras de bar para psi — multiplicando por "
+            f"{ficha.FATOR_PSI_POR_BAR} e declarando a unidade — mudou: {detalhe}. "
+            "A pressão física é a mesma; só o rótulo da unidade mudou"
+        )
+E       AssertionError: converter 2856 leituras de bar para psi — multiplicando por 14.5038 e declarando a unidade — mudou: v1: 24 decisões (5↑/19↓); v2: 83 decisões (71↑/12↓). A pressão física é a mesma; só o rótulo da unidade mudou
+E       assert False
+E        +  where False = all(<generator object test_converter_a_pressao_para_a_outra_unidade_nao_muda_a_decisao.<locals>.<genexpr> at 0xfc390b871970>)
+
+tests/test_adversarial.py:429: AssertionError
+___________ test_dropout_de_vibracao_nao_muda_as_decisoes_da_janela ____________
+
+_tabela_de_flip = (               timestamp id_maquina  ...  falha_72h operador_cod
+0    2026-06-01 00:00:00        M01  ...          1 ...': 0.012380952380952381, 'para_cima': 29, 'para_baixo': 23}, 1.0: {'taxa': 0.025, 'para_cima': 62, 'para_baixo': 43}}})
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D04 — a constante que imputa a vibração ausente decide ordens de manutenção",
+    )
+    def test_dropout_de_vibracao_nao_muda_as_decisoes_da_janela(_tabela_de_flip, medicoes):
+        """O valor com que se tapa o buraco do sensor não pode decidir nada.
+    
+        `limpar` preenche a vibração ausente com `0,0` — um valor **fora** da faixa física de
+        1,2 a 8,0 mm/s da ficha técnica. Não é um número neutro: para o modelo, "o sensor
+        falhou" fica indistinguível de "o eixo parou", e a leitura viaja por até 24 h de janela
+        móvel a partir do buraco.
+    
+        O oráculo não pergunta se perder uma leitura muda alguma coisa — perder informação pode
+        legitimamente mudar. Ele pergunta **se a constante de imputação decide**: as mesmas
+        leituras ausentes, preenchidas com o mínimo físico da ficha em vez de 0,0, têm de
+        produzir as mesmas ordens de manutenção. O mínimo da ficha é a escolha mais conservadora
+        possível — é o valor válido mais próximo de 0,0 —, então qualquer flip aqui é o piso do
+        efeito, não o teto.
+    
+        O dropout não é hipotético: o historiador já entregou este lote com ~9,7 % das leituras
+        de vibração ausentes.
+        """
+        limpo, base, _ = _tabela_de_flip
+        faixa = ficha.FICHA["vibracao_rms"]
+        imputadas = limpo["vibracao_rms"] == 0.0
+    
+        reimputado = perturbacao.contrafactual(
+            limpo, "vibracao_rms", limpo["vibracao_rms"].where(~imputadas, faixa.minimo)
+        )
+    
+        flip = _flip_por_versao(limpo, base, reimputado)
+        medicoes.setdefault("contrafactual", {})["dropout_vibracao"] = flip
+    
+        n = int(imputadas.sum())
+        detalhe = "; ".join(
+            f"{v}: {f['para_cima'] + f['para_baixo']} decisões ({f['para_cima']}↑/{f['para_baixo']}↓)"
+            for v, f in flip.items()
+        )
+>       assert all(f["taxa"] == 0 for f in flip.values()), (
+            f"trocar a constante de imputação de 0,0 para {faixa.minimo} mm/s — o mínimo "
+            f"físico da ficha — nas {n} leituras ausentes ({n / len(limpo):.2%} do lote) "
+            f"mudou: {detalhe}. Nenhuma medição nova entrou; só o número que tapa o buraco"
+        )
+E       AssertionError: trocar a constante de imputação de 0,0 para 1.2 mm/s — o mínimo físico da ficha — nas 408 leituras ausentes (9.71% do lote) mudou: v1: 10 decisões (8↑/2↓); v2: 29 decisões (22↑/7↓). Nenhuma medição nova entrou; só o número que tapa o buraco
+E       assert False
+E        +  where False = all(<generator object test_dropout_de_vibracao_nao_muda_as_decisoes_da_janela.<locals>.<genexpr> at 0xfc390b978520>)
+
+tests/test_adversarial.py:476: AssertionError
+_________ test_lote_com_uma_linha_nao_produz_maquina_risco_degenerado __________
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D15 — num lote de uma linha `maquina_risco` vira o próprio rótulo",
+    )
+    def test_lote_com_uma_linha_nao_produz_maquina_risco_degenerado():
+        """Num lote de uma linha rotulada, `maquina_risco` vira o próprio rótulo.
+    
+        `_risco_por_maquina` faz `groupby("id_maquina")["falha_72h"].transform("mean")` quando a
+        coluna de rótulo está presente. Com **uma** linha, a média do grupo é o valor daquela
+        linha: o alvo entra inteiro na feature. É D02 na sua forma mais extrema, e a consequência
+        é numérica além de conceitual — com rótulo 1 a feature vale **1,0**, quase cinco vezes o
+        maior valor que o modelo viu no treino.
+    
+        O oráculo compara com o que o painel legitimamente teria: o valor da tabela congelada
+        para aquele motor.
+        """
+        piso, teto = _faixa_de_treino_do_risco()
+        tabela = sn.features.risco_congelado()
+        observados = {}
+    
+        for rotulo in (0, 1):
+            uma = fabrica.lote_de_uma_linha()
+            uma["falha_72h"] = rotulo
+            motor = uma["id_maquina"].iloc[0]
+            X = sn.features.construir(sn.preprocessamento.limpar(uma))
+            observados[rotulo] = (float(X["maquina_risco"].iloc[0]), motor)
+    
+        esperado = {r: tabela[m] for r, (_, m) in observados.items()}
+        detalhe = "; ".join(
+            f"rótulo {r}: maquina_risco = {v} (tabela congelada de {m}: {esperado[r]})"
+            for r, (v, m) in observados.items()
+        )
+>       assert all(v == esperado[r] for r, (v, _) in observados.items()), (
+            f"um lote de uma linha rotulada faz `maquina_risco` virar o próprio rótulo — "
+            f"{detalhe}. A faixa que o modelo viu no treino é [{piso}; {teto}]"
+        )
+E       AssertionError: um lote de uma linha rotulada faz `maquina_risco` virar o próprio rótulo — rótulo 0: maquina_risco = 0.0 (tabela congelada de M01: 0.108631); rótulo 1: maquina_risco = 1.0 (tabela congelada de M01: 0.108631). A faixa que o modelo viu no treino é [0.0; 0.214286]
+E       assert False
+E        +  where False = all(<generator object test_lote_com_uma_linha_nao_produz_maquina_risco_degenerado.<locals>.<genexpr> at 0xfc390b15e6b0>)
+
+tests/test_adversarial_limites.py:118: AssertionError
+______________________ test_lote_vazio_levanta_erro_claro ______________________
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D15 — lote vazio devolve quadro vazio em silêncio, sem erro claro",
+    )
+    def test_lote_vazio_levanta_erro_claro():
+        """Um lote vazio tem de levantar `ValueError`, não devolver um quadro vazio em silêncio.
+    
+        É o caso que acontece de verdade: o historiador não respondeu, ou o filtro do turno não
+        casou com nada. Devolver zero linhas sem reclamar significa que o painel da sala de
+        controle mostra "nenhuma ordem de manutenção" — indistinguível de "nenhum motor em
+        risco". As duas situações exigem ações opostas do operador.
+        """
+        vazio = fabrica.lote_vazio()
+        assert len(vazio) == 0
+    
+        with pytest.raises(ValueError):
+            saida = sn.pipeline.executar(vazio)
+>           pytest.fail(
+                f"o pipeline aceitou um lote vazio e devolveu um quadro de {saida.shape} "
+                "sem levantar nada: 'sem dado' fica indistinguível de 'sem risco'"
+            )
+E           Failed: o pipeline aceitou um lote vazio e devolveu um quadro de (0, 5) sem levantar nada: 'sem dado' fica indistinguível de 'sem risco'
+
+tests/test_adversarial_limites.py:143: Failed
+_____ test_leitura_fisicamente_impossivel_e_rejeitada_antes_da_inferencia ______
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D21 — o serving aceita leitura fora da faixa física e emite probabilidade",
+    )
+    def test_leitura_fisicamente_impossivel_e_rejeitada_antes_da_inferencia():
+        """500 °C, pressão negativa: o serving tem de recusar, não emitir probabilidade.
+    
+        `Modelo._matriz` confere forma e finitude — e nada mais (SPEC P5). Um termopar em curto
+        reporta 500 °C; a ficha técnica declara a faixa 45–95 °C. O SUT aceita, constrói as
+        features e devolve um número com três casas decimais, que o painel exibe ao operador
+        como se fosse uma medição.
+    
+        É exatamente a lição do `mode='serve'` da aula 3: a validação que existe (a ficha) nunca
+        é chamada no ponto em que a decisão é tomada.
+        """
+        impossiveis = [("temperatura_c", 500.0), ("pressao", -3.0)]
+        aceitas = []
+    
+        for coluna, valor in impossiveis:
+            faixa = ficha.FICHA[coluna]
+            lote = fabrica.com_leitura_fora_de_faixa(
+                fabrica.lote(n_maquinas=2, n_horas=48), coluna, valor
+            )
+            try:
+                saida = sn.pipeline.executar(lote)
+            except ValueError:
+                continue
+            aceitas.append(
+                f"{coluna}={valor} (faixa da ficha: {faixa.minimo}–{faixa.maximo} "
+                f"{faixa.unidade}) → probabilidade {saida['probabilidade'].iloc[0]:.6f}"
+            )
+    
+>       assert not aceitas, (
+            "o ponto de serving aceitou leitura fisicamente impossível e emitiu decisão: "
+            + "; ".join(aceitas)
+        )
+E       AssertionError: o ponto de serving aceitou leitura fisicamente impossível e emitiu decisão: temperatura_c=500.0 (faixa da ficha: 45.0–95.0 °C) → probabilidade 0.429606; pressao=-3.0 (faixa da ficha: 3.0–4.5 bar) → probabilidade 0.048447
+E       assert not ['temperatura_c=500.0 (faixa da ficha: 45.0–95.0 °C) → probabilidade 0.429606', 'pressao=-3.0 (faixa da ficha: 3.0–4.5 bar) → probabilidade 0.048447']
+
+tests/test_adversarial_limites.py:183: AssertionError
+__________ test_lote_com_leitura_duplicada_nao_dobra_o_peso_na_janela __________
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D16 — leitura reenviada dobra o peso na janela móvel",
+    )
+    def test_lote_com_leitura_duplicada_nao_dobra_o_peso_na_janela():
+        """Reenvio do historiador: a mesma `(id_maquina, timestamp)` não pode pesar duas vezes.
+    
+        `limpar` não desduplica a chave. Uma retransmissão — evento rotineiro — faz a leitura
+        entrar duas vezes na janela móvel e puxar a média para o próprio valor. Nenhuma medição
+        nova aconteceu; o motor não mudou.
+        """
+        base = fabrica.lote(n_maquinas=1, n_horas=48)
+        duplicado = fabrica.com_leitura_duplicada(base, posicao=20)
+    
+        limpo = sn.preprocessamento.limpar(duplicado)
+        sobrevivem = int(limpo.duplicated(subset=["id_maquina", "timestamp"]).sum())
+    
+        X0 = sn.features.construir(sn.preprocessamento.limpar(base))
+        X1 = sn.features.construir(limpo)
+    
+        antes = X0["temp_media_6h"].iloc[20:24].to_numpy()
+        depois = X1["temp_media_6h"].iloc[20:24].to_numpy()
+        movidas = [
+            f"hora {20 + i}: {antes[i]:.6f} → {depois[i]:.6f} ({depois[i] - antes[i]:+.6f} °C)"
+            for i in range(4)
+            if antes[i] != depois[i]
+        ]
+    
+>       assert not movidas, (
+            f"duplicar a leitura da hora 20 — {sobrevivem} chave(s) duplicada(s) sobreviveram "
+            f"à limpeza, {len(X0)} linhas viraram {len(X1)} — moveu `temp_media_6h`: "
+            + "; ".join(movidas)
+        )
+E       AssertionError: duplicar a leitura da hora 20 — 1 chave(s) duplicada(s) sobreviveram à limpeza, 48 linhas viraram 49 — moveu `temp_media_6h`: hora 20: 64.769029 → 64.909973 (+0.140944 °C); hora 21: 66.240009 → 66.903845 (+0.663836 °C); hora 22: 65.889955 → 67.919453 (+2.029498 °C)
+E       assert not ['hora 20: 64.769029 → 64.909973 (+0.140944 °C)', 'hora 21: 66.240009 → 66.903845 (+0.663836 °C)', 'hora 22: 65.889955 → 67.919453 (+2.029498 °C)']
+
+tests/test_adversarial_limites.py:219: AssertionError
+________________ test_painel_de_um_registro_concorda_com_o_lote ________________
+
+    @pytest.mark.adversarial
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D15 — o painel de um registro discorda do lote e perde o alarme",
+    )
+    def test_painel_de_um_registro_concorda_com_o_lote():
+        """O painel da sala de controle tem de dar a mesma ordem que o lote noturno.
+    
+        `prever_registro` é o caminho do painel: uma leitura por vez. Mas o painel **não tem o
+        lote** — ele constrói as features da linha que recebeu, sozinha. E é aí que
+        `maquina_risco` degenera: no lote ela é a média do motor, no painel ela vira o rótulo
+        daquela linha.
+    
+        O recorte do teste é o recorte que a operação faz — a lição de D09 e D22. Um teste que
+        passasse as features **do lote** para `prever_registro` compararia o SUT consigo mesmo e
+        passaria em verde sem tocar no defeito.
+        """
+        lote = fabrica.lote(n_maquinas=3, n_horas=48)
+        saida = sn.pipeline.executar(lote)
+        modelo = sn.modelo.carregar("v1")
+    
+        discordam = []
+        for i in (30, 60, 90):
+            no_lote = int(saida["predicao"].iloc[i])
+    
+            sozinha = lote.iloc[[i]].copy()
+            X = sn.features.construir(sn.preprocessamento.limpar(sozinha))
+            registro = {c: float(X[c].iloc[0]) for c in sn.features.ORDEM_FEATURES}
+            no_painel = modelo.prever_registro(registro)
+    
+            if no_painel != no_lote:
+                X_lote = sn.features.construir(sn.preprocessamento.limpar(lote))
+                discordam.append(
+                    f"linha {i}: lote diz {no_lote}, painel diz {no_painel} "
+                    f"(maquina_risco {X_lote['maquina_risco'].iloc[i]:.6f} no lote contra "
+                    f"{registro['maquina_risco']:.6f} no painel)"
+                )
+    
+>       assert not discordam, (
+            "a mesma leitura recebe ordens diferentes conforme entre pelo lote ou pelo painel: "
+            + "; ".join(discordam)
+        )
+E       AssertionError: a mesma leitura recebe ordens diferentes conforme entre pelo lote ou pelo painel: linha 30: lote diz 1, painel diz 0 (maquina_risco 0.145833 no lote contra 0.000000 no painel); linha 60: lote diz 1, painel diz 0 (maquina_risco 0.187500 no lote contra 0.000000 no painel); linha 90: lote diz 1, painel diz 0 (maquina_risco 0.187500 no lote contra 0.000000 no painel)
+E       assert not ['linha 30: lote diz 1, painel diz 0 (maquina_risco 0.145833 no lote contra 0.000000 no painel)', 'linha 60: lote diz ... 0.000000 no painel)', 'linha 90: lote diz 1, painel diz 0 (maquina_risco 0.187500 no lote contra 0.000000 no painel)']
+
+tests/test_adversarial_limites.py:265: AssertionError
+___________________ test_rpm_esta_na_faixa_da_ficha[treino] ____________________
+
+request = <FixtureRequest for <Function test_rpm_esta_na_faixa_da_ficha[treino]>>
+nome_conjunto = 'treino'
+
+    @pytest.mark.parametrize("nome_conjunto", _params_d17(D17_RPM))
+    def test_rpm_esta_na_faixa_da_ficha(request, nome_conjunto):
+        """A ficha diz 1.650–1.800 rpm. Há leituras acima em treino e produção."""
+        bruto = request.getfixturevalue(f"lote_{nome_conjunto}")
+>       assert ficha.validar_faixa(bruto, "rpm") is True
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_contrato_dados.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+df =                  timestamp id_maquina  ...  horas_operacao falha_72h
+0      2026-05-04 00:00:00        M01  ...       ...       7151.0         1
+16799  2026-05-31 23:00:00        M25  ...         16391.0         0
+
+[16800 rows x 13 columns]
+coluna = 'rpm', valores = None
+
+    def validar_faixa(df: pd.DataFrame, coluna: str, valores: pd.Series | None = None) -> bool:
+        """A coluna está dentro da faixa da ficha. Nomeia a coluna e conta as violações.
+    
+        `valores` permite validar uma versão derivada da coluna — é assim que a pressão é
+        verificada **depois** de convertida para bar.
+        """
+        if coluna not in FICHA:
+            raise ValueError(f"coluna fora da ficha técnica: {coluna!r}")
+        faixa = FICHA[coluna]
+        serie = df[coluna] if valores is None else valores
+        serie = serie.astype(float)
+    
+        fora = serie.notna() & ~serie.between(faixa.minimo, faixa.maximo)
+        if fora.any():
+>           raise ValueError(
+                f"{coluna}: {int(fora.sum())} de {len(serie)} leituras fora da faixa "
+                f"[{faixa.minimo}, {faixa.maximo}] {faixa.unidade} "
+                f"(mín={serie.min():.4g}, máx={serie.max():.4g})"
+            )
+E           ValueError: rpm: 4 de 16800 leituras fora da faixa [1650.0, 1800.0] rpm (mín=1708, máx=1803)
+
+suite/ficha.py:114: ValueError
+__________________ test_rpm_esta_na_faixa_da_ficha[producao] ___________________
+
+request = <FixtureRequest for <Function test_rpm_esta_na_faixa_da_ficha[producao]>>
+nome_conjunto = 'producao'
+
+    @pytest.mark.parametrize("nome_conjunto", _params_d17(D17_RPM))
+    def test_rpm_esta_na_faixa_da_ficha(request, nome_conjunto):
+        """A ficha diz 1.650–1.800 rpm. Há leituras acima em treino e produção."""
+        bruto = request.getfixturevalue(f"lote_{nome_conjunto}")
+>       assert ficha.validar_faixa(bruto, "rpm") is True
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_contrato_dados.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+df =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-08 00:00:00        M01  ...         ...         7487.0         0
+4199  2026-06-14 23:00:00        M25  ...         16727.0         0
+
+[4200 rows x 13 columns]
+coluna = 'rpm', valores = None
+
+    def validar_faixa(df: pd.DataFrame, coluna: str, valores: pd.Series | None = None) -> bool:
+        """A coluna está dentro da faixa da ficha. Nomeia a coluna e conta as violações.
+    
+        `valores` permite validar uma versão derivada da coluna — é assim que a pressão é
+        verificada **depois** de convertida para bar.
+        """
+        if coluna not in FICHA:
+            raise ValueError(f"coluna fora da ficha técnica: {coluna!r}")
+        faixa = FICHA[coluna]
+        serie = df[coluna] if valores is None else valores
+        serie = serie.astype(float)
+    
+        fora = serie.notna() & ~serie.between(faixa.minimo, faixa.maximo)
+        if fora.any():
+>           raise ValueError(
+                f"{coluna}: {int(fora.sum())} de {len(serie)} leituras fora da faixa "
+                f"[{faixa.minimo}, {faixa.maximo}] {faixa.unidade} "
+                f"(mín={serie.min():.4g}, máx={serie.max():.4g})"
+            )
+E           ValueError: rpm: 1 de 4200 leituras fora da faixa [1650.0, 1800.0] rpm (mín=1712, máx=1803)
+
+suite/ficha.py:114: ValueError
+____________ test_pressao_convertida_esta_na_faixa_da_ficha[treino] ____________
+
+request = <FixtureRequest for <Function test_pressao_convertida_esta_na_faixa_da_ficha[treino]>>
+nome_conjunto = 'treino'
+
+    @pytest.mark.parametrize("nome_conjunto", _params_d17(D17_PRESSAO))
+    def test_pressao_convertida_esta_na_faixa_da_ficha(request, nome_conjunto):
+        """Depois de converter psi→bar, a pressão tem de caber em 3,0–4,5 bar.
+    
+        Converter é responsabilidade de quem lê o dado, já que o SUT não converte (D03).
+        O que sobra fora da faixa **depois** da conversão é leitura fisicamente impossível.
+        """
+        bruto = request.getfixturevalue(f"lote_{nome_conjunto}")
+        em_bar = ficha.converter_pressao_para_bar(bruto)
+>       assert ficha.validar_faixa(bruto, "pressao", valores=em_bar) is True
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_contrato_dados.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+df =                  timestamp id_maquina  ...  horas_operacao falha_72h
+0      2026-05-04 00:00:00        M01  ...       ...       7151.0         1
+16799  2026-05-31 23:00:00        M25  ...         16391.0         0
+
+[16800 rows x 13 columns]
+coluna = 'pressao'
+valores = 0        3.927000
+1        3.850000
+2        4.064000
+3        3.891000
+4        4.170000
+           ...   
+16795    3...92
+16796    4.236269
+16797    3.903667
+16798    3.603607
+16799    3.941932
+Name: pressao, Length: 16800, dtype: float64
+
+    def validar_faixa(df: pd.DataFrame, coluna: str, valores: pd.Series | None = None) -> bool:
+        """A coluna está dentro da faixa da ficha. Nomeia a coluna e conta as violações.
+    
+        `valores` permite validar uma versão derivada da coluna — é assim que a pressão é
+        verificada **depois** de convertida para bar.
+        """
+        if coluna not in FICHA:
+            raise ValueError(f"coluna fora da ficha técnica: {coluna!r}")
+        faixa = FICHA[coluna]
+        serie = df[coluna] if valores is None else valores
+        serie = serie.astype(float)
+    
+        fora = serie.notna() & ~serie.between(faixa.minimo, faixa.maximo)
+        if fora.any():
+>           raise ValueError(
+                f"{coluna}: {int(fora.sum())} de {len(serie)} leituras fora da faixa "
+                f"[{faixa.minimo}, {faixa.maximo}] {faixa.unidade} "
+                f"(mín={serie.min():.4g}, máx={serie.max():.4g})"
+            )
+E           ValueError: pressao: 5 de 16800 leituras fora da faixa [3.0, 4.5] bar (mín=3.179, máx=4.565)
+
+suite/ficha.py:114: ValueError
+___________ test_pressao_convertida_esta_na_faixa_da_ficha[producao] ___________
+
+request = <FixtureRequest for <Function test_pressao_convertida_esta_na_faixa_da_ficha[producao]>>
+nome_conjunto = 'producao'
+
+    @pytest.mark.parametrize("nome_conjunto", _params_d17(D17_PRESSAO))
+    def test_pressao_convertida_esta_na_faixa_da_ficha(request, nome_conjunto):
+        """Depois de converter psi→bar, a pressão tem de caber em 3,0–4,5 bar.
+    
+        Converter é responsabilidade de quem lê o dado, já que o SUT não converte (D03).
+        O que sobra fora da faixa **depois** da conversão é leitura fisicamente impossível.
+        """
+        bruto = request.getfixturevalue(f"lote_{nome_conjunto}")
+        em_bar = ficha.converter_pressao_para_bar(bruto)
+>       assert ficha.validar_faixa(bruto, "pressao", valores=em_bar) is True
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_contrato_dados.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+df =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-08 00:00:00        M01  ...         ...         7487.0         0
+4199  2026-06-14 23:00:00        M25  ...         16727.0         0
+
+[4200 rows x 13 columns]
+coluna = 'pressao'
+valores = 0       4.175000
+1       3.885000
+2       3.446000
+3       3.959000
+4       3.755000
+          ...   
+4195    3.892359
+4196    3.757084
+4197    4.161599
+4198    3.918559
+4199    3.495980
+Name: pressao, Length: 4200, dtype: float64
+
+    def validar_faixa(df: pd.DataFrame, coluna: str, valores: pd.Series | None = None) -> bool:
+        """A coluna está dentro da faixa da ficha. Nomeia a coluna e conta as violações.
+    
+        `valores` permite validar uma versão derivada da coluna — é assim que a pressão é
+        verificada **depois** de convertida para bar.
+        """
+        if coluna not in FICHA:
+            raise ValueError(f"coluna fora da ficha técnica: {coluna!r}")
+        faixa = FICHA[coluna]
+        serie = df[coluna] if valores is None else valores
+        serie = serie.astype(float)
+    
+        fora = serie.notna() & ~serie.between(faixa.minimo, faixa.maximo)
+        if fora.any():
+>           raise ValueError(
+                f"{coluna}: {int(fora.sum())} de {len(serie)} leituras fora da faixa "
+                f"[{faixa.minimo}, {faixa.maximo}] {faixa.unidade} "
+                f"(mín={serie.min():.4g}, máx={serie.max():.4g})"
+            )
+E           ValueError: pressao: 1 de 4200 leituras fora da faixa [3.0, 4.5] bar (mín=3.264, máx=4.511)
+
+suite/ficha.py:114: ValueError
+______ test_distribuicoes_de_entrada_sao_as_mesmas_entre_teste_e_producao ______
+
+conjuntos = {'treino':                  timestamp id_maquina  ...  horas_operacao falha_72h
+0      2026-05-04 00:00:00        M01 ...        7487.0         0
+4199  2026-06-14 23:00:00        M25  ...         16727.0         0
+
+[4200 rows x 13 columns]}
+colunas_de_sensor = ['temperatura_c', 'vibracao_rms', 'pressao', 'corrente_a', 'rpm', 'idade_equipamento_meses']
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D13 — 5 das 6 colunas de sensor mudaram de distribuição e a média não acusa nenhuma",
+    )
+    def test_distribuicoes_de_entrada_sao_as_mesmas_entre_teste_e_producao(
+        conjuntos, colunas_de_sensor, medicoes
+    ):
+        """Nenhuma coluna de sensor deveria acusar drift entre o baseline e produção."""
+        medido = {
+            coluna: drift.medir(conjuntos["teste"][coluna], conjuntos["producao"][coluna], LIMIAR_MEDIA, ALPHA)
+            for coluna in colunas_de_sensor
+        }
+        medicoes["drift"] = medido
+    
+        acusadas = {
+            coluna: m for coluna, m in medido.items() if m["ks_acusa"] or m["psi_classe"] != "estavel"
+        }
+>       assert not acusadas, (
+            f"{len(acusadas)} de {len(medido)} colunas acusam drift: "
+            + "; ".join(
+                f"{coluna} (KS p={m['ks_p']:.3g}, PSI={m['psi']:.4f} → {m['psi_classe']}, "
+                f"mas Δmédia de só {100 * m['delta_relativo']:.2f} %)"
+                for coluna, m in acusadas.items()
+            )
+        )
+E       AssertionError: 5 de 6 colunas acusam drift: temperatura_c (KS p=3.53e-33, PSI=0.1798 → atencao, mas Δmédia de só 1.76 %); vibracao_rms (KS p=1.14e-21, PSI=0.1403 → atencao, mas Δmédia de só 2.05 %); pressao (KS p=1.6e-05, PSI=0.0520 → estavel, mas Δmédia de só 0.65 %); corrente_a (KS p=3.19e-11, PSI=0.0575 → estavel, mas Δmédia de só 0.52 %); rpm (KS p=9.76e-07, PSI=0.0203 → estavel, mas Δmédia de só 0.05 %)
+E       assert not {'temperatura_c': {'delta_media': -1.206952, 'delta_relativo': 0.017636, 'media_acusa': False, 'ks_estatistica': 0.133...a': {'delta_media': -0.102921, 'delta_relativo': 0.005193, 'media_acusa': False, 'ks_estatistica': 0.076905, ...}, ...}
+
+tests/test_estatistico_drift.py:101: AssertionError
+_______________________ test_limiar_0_5_maximiza_f2[v1] ________________________
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v1'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D11 — o 0,5 do sistema não maximiza F2: v2 tem ótimo em 0,20 (+0,0865 de F2)",
+    )
+    @pytest.mark.parametrize("versao", VERSOES)
+    def test_limiar_0_5_maximiza_f2(medidas, versao):
+        """O 0,5 do sistema deveria ser o melhor limiar para F2 (recall pesando 4×)."""
+        y, proba = medidas[versao]
+        tabela = _varredura(y, proba)
+        melhor = max(tabela, key=lambda linha: linha["f2"])
+        em_meio = next(linha for linha in tabela if linha["limiar"] == 0.5)
+    
+>       assert melhor["limiar"] == 0.5, (
+            f"{versao}: F2 é máximo em {melhor['limiar']:.2f} (F2={melhor['f2']:.4f}), "
+            f"não em 0,50 (F2={em_meio['f2']:.4f}); diferença de {melhor['f2'] - em_meio['f2']:+.4f}"
+        )
+E       AssertionError: v1: F2 é máximo em 0.55 (F2=0.7356), não em 0,50 (F2=0.7346); diferença de +0.0010
+E       assert 0.55 == 0.5
+
+tests/test_estatistico_limiar_calibracao.py:125: AssertionError
+_______________________ test_limiar_0_5_maximiza_f2[v2] ________________________
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v2'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D11 — o 0,5 do sistema não maximiza F2: v2 tem ótimo em 0,20 (+0,0865 de F2)",
+    )
+    @pytest.mark.parametrize("versao", VERSOES)
+    def test_limiar_0_5_maximiza_f2(medidas, versao):
+        """O 0,5 do sistema deveria ser o melhor limiar para F2 (recall pesando 4×)."""
+        y, proba = medidas[versao]
+        tabela = _varredura(y, proba)
+        melhor = max(tabela, key=lambda linha: linha["f2"])
+        em_meio = next(linha for linha in tabela if linha["limiar"] == 0.5)
+    
+>       assert melhor["limiar"] == 0.5, (
+            f"{versao}: F2 é máximo em {melhor['limiar']:.2f} (F2={melhor['f2']:.4f}), "
+            f"não em 0,50 (F2={em_meio['f2']:.4f}); diferença de {melhor['f2'] - em_meio['f2']:+.4f}"
+        )
+E       AssertionError: v2: F2 é máximo em 0.20 (F2=0.7375), não em 0,50 (F2=0.6510); diferença de +0.0865
+E       assert 0.2 == 0.5
+
+tests/test_estatistico_limiar_calibracao.py:125: AssertionError
+____________________ test_limiar_de_custo_minimo_e_0_5[v2] _____________________
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v2'
+
+    @pytest.mark.parametrize(
+        "versao",
+        [
+            # A v1 PASSA: com FN valendo 20× FP, o custo dela é mínimo exatamente em 0,50.
+            # Medido, não suposto — o HANDOFF previa o contrário. Marcar a função inteira
+            # daria XPASS aqui e derrubaria a suíte (padrão de D17, `docs/decisoes.md`).
+            "v1",
+            pytest.param(
+                "v2",
+                marks=[
+                    pytest.mark.defeito,
+                    pytest.mark.xfail(
+                        strict=True,
+                        reason="D11 — herdar o limiar 0,5 da v1 custa 2.605 a mais na v2 (4.393 contra 1.788)",
+                    ),
+                ],
+            ),
+        ],
+    )
+    def test_limiar_de_custo_minimo_e_0_5(medidas, versao):
+        """Com FN valendo 20× FP, o limiar de custo mínimo deveria ser o do sistema."""
+        y, proba = medidas[versao]
+        custos = {limiar: _custo(y, proba, limiar) for limiar in LIMIARES}
+        melhor = min(custos, key=custos.get)
+    
+>       assert melhor == 0.5, (
+            f"{versao}: custo mínimo em {melhor:.2f} (custo={custos[melhor]}), "
+            f"não em 0,50 (custo={custos[0.5]}); "
+            f"o limiar do sistema custa {custos[0.5] - custos[melhor]} a mais"
+        )
+E       AssertionError: v2: custo mínimo em 0.15 (custo=1788), não em 0,50 (custo=4393); o limiar do sistema custa 2605 a mais
+E       assert 0.15 == 0.5
+
+tests/test_estatistico_limiar_calibracao.py:156: AssertionError
+_____________ test_ece_por_versao_fica_abaixo_de_cinco_pontos[v1] ______________
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v1'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D12 — ECE de 19,06 p.p. (v1) e 5,76 p.p. (v2) contra o teto de 5 p.p.",
+    )
+    @pytest.mark.parametrize("versao", VERSOES)
+    def test_ece_por_versao_fica_abaixo_de_cinco_pontos(medidas, versao):
+        """ECE ≤ 5 p.p.: a confiança anunciada não deveria distar mais que isso do observado."""
+        y, proba = medidas[versao]
+        medido = calibracao.ece(y, proba)
+    
+>       assert medido <= 0.05, f"{versao}: ECE = {medido:.4f} ({100 * medido:.2f} p.p.)"
+E       AssertionError: v1: ECE = 0.1906 (19.06 p.p.)
+E       assert 0.19063174103968253 <= 0.05
+
+tests/test_estatistico_limiar_calibracao.py:187: AssertionError
+_____________ test_ece_por_versao_fica_abaixo_de_cinco_pontos[v2] ______________
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v2'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D12 — ECE de 19,06 p.p. (v1) e 5,76 p.p. (v2) contra o teto de 5 p.p.",
+    )
+    @pytest.mark.parametrize("versao", VERSOES)
+    def test_ece_por_versao_fica_abaixo_de_cinco_pontos(medidas, versao):
+        """ECE ≤ 5 p.p.: a confiança anunciada não deveria distar mais que isso do observado."""
+        y, proba = medidas[versao]
+        medido = calibracao.ece(y, proba)
+    
+>       assert medido <= 0.05, f"{versao}: ECE = {medido:.4f} ({100 * medido:.2f} p.p.)"
+E       AssertionError: v2: ECE = 0.0576 (5.76 p.p.)
+E       assert 0.057555700544642846 <= 0.05
+
+tests/test_estatistico_limiar_calibracao.py:187: AssertionError
+_________________ test_curva_de_confiabilidade_e_monotona[v1] __________________
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v1'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D12 — a frequência observada cai ao subir de faixa: 3 quebras na v1, 1 na v2",
+    )
+    @pytest.mark.parametrize("versao", VERSOES)
+    def test_curva_de_confiabilidade_e_monotona(medidas, versao):
+        """Faixa de probabilidade maior ⇒ frequência de falha observada maior.
+    
+        É o mínimo que se pede de um score usado para **ordenar** motores: se a ordem se quebra,
+        priorizar pelo número é pior que priorizar pelo palpite de quem conhece a planta.
+        """
+        y, proba = medidas[versao]
+        tabela = calibracao.bins_de_confiabilidade(y, proba)
+        observado = [faixa["observado"] for faixa in tabela]
+    
+        quebras = [
+            (tabela[i]["faixa"], observado[i - 1], observado[i])
+            for i in range(1, len(observado))
+            if observado[i] < observado[i - 1]
+        ]
+>       assert not quebras, f"{versao}: {len(quebras)} quebra(s) de monotonia: " + "; ".join(
+            f"faixa {lo:.1f}–{hi:.1f} caiu de {antes:.4f} para {depois:.4f}"
+            for (lo, hi), antes, depois in quebras
+        )
+E       AssertionError: v1: 3 quebra(s) de monotonia: faixa 0.1–0.2 caiu de 0.0169 para 0.0096; faixa 0.2–0.3 caiu de 0.0096 para 0.0000; faixa 0.4–0.5 caiu de 0.0250 para 0.0247
+E       assert not [((0.1, 0.2), 0.016853932584269662, 0.009554140127388535), ((0.2, 0.30000000000000004), 0.009554140127388535, 0.0), ((0.4, 0.5), 0.025, 0.024691358024691357)]
+
+tests/test_estatistico_limiar_calibracao.py:211: AssertionError
+_________________ test_curva_de_confiabilidade_e_monotona[v2] __________________
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v2'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D12 — a frequência observada cai ao subir de faixa: 3 quebras na v1, 1 na v2",
+    )
+    @pytest.mark.parametrize("versao", VERSOES)
+    def test_curva_de_confiabilidade_e_monotona(medidas, versao):
+        """Faixa de probabilidade maior ⇒ frequência de falha observada maior.
+    
+        É o mínimo que se pede de um score usado para **ordenar** motores: se a ordem se quebra,
+        priorizar pelo número é pior que priorizar pelo palpite de quem conhece a planta.
+        """
+        y, proba = medidas[versao]
+        tabela = calibracao.bins_de_confiabilidade(y, proba)
+        observado = [faixa["observado"] for faixa in tabela]
+    
+        quebras = [
+            (tabela[i]["faixa"], observado[i - 1], observado[i])
+            for i in range(1, len(observado))
+            if observado[i] < observado[i - 1]
+        ]
+>       assert not quebras, f"{versao}: {len(quebras)} quebra(s) de monotonia: " + "; ".join(
+            f"faixa {lo:.1f}–{hi:.1f} caiu de {antes:.4f} para {depois:.4f}"
+            for (lo, hi), antes, depois in quebras
+        )
+E       AssertionError: v2: 1 quebra(s) de monotonia: faixa 0.5–0.6 caiu de 0.3033 para 0.2864
+E       assert not [((0.5, 0.6000000000000001), 0.3033175355450237, 0.2863636363636364)]
+
+tests/test_estatistico_limiar_calibracao.py:211: AssertionError
+_ test_probabilidade_media_prevista_bate_com_a_frequencia_observada_por_faixa[v1] _
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v1'
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D12 — superconfiança nas 20 faixas: gap máximo 0,4227 (v1) e 0,3140 (v2)",
+    )
+    @pytest.mark.parametrize("versao", VERSOES)
+    def test_probabilidade_media_prevista_bate_com_a_frequencia_observada_por_faixa(
+        medidas, versao, medicoes
+    ):
+        """O pedido literal do guia do aluno, faixa a faixa.
+    
+        Tolerância de 10 p.p.: é generosa de propósito, para que uma falha aqui seja
+        indiscutível e não uma discussão sobre onde se põe a régua.
+        """
+        y, proba = medidas[versao]
+        tabela = calibracao.bins_de_confiabilidade(y, proba)
+        medicoes.setdefault("calibracao", {}).setdefault("bins", {})[versao] = tabela
+    
+        piores = sorted(tabela, key=lambda faixa: abs(faixa["gap"]), reverse=True)[:3]
+        maior = abs(piores[0]["gap"])
+    
+>       assert maior <= 0.10, f"{versao}: maior desvio |confiança − observado| = {maior:.4f}; piores faixas: " + "; ".join(
+            f"{faixa['faixa'][0]:.1f}–{faixa['faixa'][1]:.1f} prometeu {faixa['confianca']:.4f} "
+            f"e observou {faixa['observado']:.4f} (n={faixa['n']})"
+            for faixa in piores
+        )
+E       AssertionError: v1: maior desvio |confiança − observado| = 0.4227; piores faixas: 0.4–0.5 prometeu 0.4473 e observou 0.0247 (n=162); 0.7–0.8 prometeu 0.7573 e observou 0.3464 (n=332); 0.6–0.7 prometeu 0.6504 e observou 0.2589 (n=394)
+E       assert 0.42265679999999994 <= 0.1
+
+tests/test_estatistico_limiar_calibracao.py:238: AssertionError
+_ test_probabilidade_media_prevista_bate_com_a_frequencia_observada_por_faixa[v2] _
+
+medidas = {'v1': (array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), array([0.19919765, 0.09992912, 0.0913186 , ..., 0.7843905 , 0.0...=(4200,)), array([0.22616166, 0.01810966, 0.08476889, ..., 0.39516773, 0.00208297,
+       0.35558579], shape=(4200,)))}
+versao = 'v2'
+medicoes = {'sut': {}, 'contrato_dados': {}, 'linha_de_base': [], 'v1_v2': {}, ...}
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D12 — superconfiança nas 20 faixas: gap máximo 0,4227 (v1) e 0,3140 (v2)",
+    )
+    @pytest.mark.parametrize("versao", VERSOES)
+    def test_probabilidade_media_prevista_bate_com_a_frequencia_observada_por_faixa(
+        medidas, versao, medicoes
+    ):
+        """O pedido literal do guia do aluno, faixa a faixa.
+    
+        Tolerância de 10 p.p.: é generosa de propósito, para que uma falha aqui seja
+        indiscutível e não uma discussão sobre onde se põe a régua.
+        """
+        y, proba = medidas[versao]
+        tabela = calibracao.bins_de_confiabilidade(y, proba)
+        medicoes.setdefault("calibracao", {}).setdefault("bins", {})[versao] = tabela
+    
+        piores = sorted(tabela, key=lambda faixa: abs(faixa["gap"]), reverse=True)[:3]
+        maior = abs(piores[0]["gap"])
+    
+>       assert maior <= 0.10, f"{versao}: maior desvio |confiança − observado| = {maior:.4f}; piores faixas: " + "; ".join(
+            f"{faixa['faixa'][0]:.1f}–{faixa['faixa'][1]:.1f} prometeu {faixa['confianca']:.4f} "
+            f"e observou {faixa['observado']:.4f} (n={faixa['n']})"
+            for faixa in piores
+        )
+E       AssertionError: v2: maior desvio |confiança − observado| = 0.3140; piores faixas: 0.6–0.7 prometeu 0.6486 e observou 0.3345 (n=278); 0.5–0.6 prometeu 0.5454 e observou 0.2864 (n=220); 0.4–0.5 prometeu 0.4592 e observou 0.3033 (n=211)
+E       assert 0.3140428272482014 <= 0.1
+
+tests/test_estatistico_limiar_calibracao.py:238: AssertionError
+__________________ test_v2_nao_regride_recall_em_relacao_a_v1 __________________
+
+comparacao = {'teste': {'y': array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), 'v1': {'proba': array([0.19919765, 0.09992912, 0.091318...., 0.        , 0.03165754,
+       0.872198  ], shape=(4200,)), 'pred': array([0, 0, 0, ..., 0, 0, 1], shape=(4200,))}}}
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason="D11 — a v2 perde 23,97 pp de recall: 157 falhas reais a mais que a v1 deixa passar",
+    )
+    def test_v2_nao_regride_recall_em_relacao_a_v1(comparacao):
+        """O recall da v2 deveria ser pelo menos o da v1 — é a métrica que a planta compra."""
+        dados = comparacao["teste"]
+        r1 = _recall(dados["y"], dados["v1"]["pred"])
+        r2 = _recall(dados["y"], dados["v2"]["pred"])
+    
+>       assert r2 >= r1, (
+            f"recall v1={r1:.4f}, v2={r2:.4f}: a v2 perde {100 * (r1 - r2):.2f} pp de recall — "
+            f"deixa de pegar {int(round((r1 - r2) * dados['y'].sum()))} falhas reais a mais que a v1"
+        )
+E       AssertionError: recall v1=0.9374, v2=0.6977: a v2 perde 23.97 pp de recall — deixa de pegar 157 falhas reais a mais que a v1
+E       assert 0.6977099236641221 >= 0.9374045801526718
+
+tests/test_estatistico_v1_v2.py:103: AssertionError
+______________ test_pr_auc_da_v2_nao_e_pior_que_a_da_v1[producao] ______________
+
+comparacao = {'teste': {'y': array([1, 0, 0, ..., 0, 0, 0], shape=(4200,)), 'v1': {'proba': array([0.19919765, 0.09992912, 0.091318...., 0.        , 0.03165754,
+       0.872198  ], shape=(4200,)), 'pred': array([0, 0, 0, ..., 0, 0, 1], shape=(4200,))}}}
+conjunto = 'producao'
+
+    @pytest.mark.parametrize(
+        "conjunto",
+        [
+            # `teste` PASSA: como ranqueadora, a v2 é melhor ali (+9,07 pp de PR-AUC).
+            # A vantagem some em produção. Marcar a função inteira daria XPASS em [teste]
+            # e derrubaria a suíte (padrão de D17, `docs/decisoes.md`).
+            "teste",
+            pytest.param(
+                "producao",
+                marks=[
+                    pytest.mark.defeito,
+                    pytest.mark.xfail(
+                        strict=True,
+                        reason="D11 — em produção a PR-AUC da v2 fica 0,54 pp abaixo da v1",
+                    ),
+                ],
+            ),
+        ],
+    )
+    def test_pr_auc_da_v2_nao_e_pior_que_a_da_v1(comparacao, conjunto):
+        """PR-AUC por versão — a métrica de ranking que não depende do limiar."""
+        dados = comparacao[conjunto]
+        ap1 = metricas.average_precision(dados["y"], dados["v1"]["proba"])
+        ap2 = metricas.average_precision(dados["y"], dados["v2"]["proba"])
+    
+>       assert ap2 >= ap1, (
+            f"{conjunto}/sem vazamento: PR-AUC v1={ap1:.4f}, v2={ap2:.4f} "
+            f"({100 * (ap2 - ap1):+.2f} pp)"
+        )
+E       AssertionError: producao/sem vazamento: PR-AUC v1=0.6433, v2=0.6379 (-0.54 pp)
+E       assert 0.637875137520198 >= 0.6433013560201941
+
+tests/test_estatistico_v1_v2.py:204: AssertionError
+_____________ test_temp_media_6h_nao_muda_quando_so_o_futuro_muda ______________
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D01 — `rolling(6, center=True)` faz a janela ser [t-2, t+3]: a feature de agora usa leitura que a planta só terá em 3 h")
+    def test_temp_media_6h_nao_muda_quando_so_o_futuro_muda():
+        """A feature de `t` não pode usar leitura que a planta só terá em 3 horas.
+    
+        `rolling(6, center=True)` faz a janela ser `[t−2, t+3]`. O desempenho medido no
+        conjunto de teste é, por construção, inalcançável em produção: na hora `t` o
+        historiador simplesmente não tem `t+1`, `t+2`, `t+3`.
+        """
+        antes, depois = _antes_e_depois("temperatura_c")
+    
+        delta = (depois["temp_media_6h"] - antes["temp_media_6h"]).abs()
+        afetadas = int((delta > 1e-9).sum())
+        delta_em_t = float(delta.iloc[HORA_DO_CORTE])
+    
+>       assert delta_em_t == pytest.approx(0.0, abs=1e-9), (
+            f"temp_media_6h[t={HORA_DO_CORTE}] mudou {delta_em_t:.4f} °C ao perturbar "
+            f"APENAS t+1..t+{len(antes) - HORA_DO_CORTE - 1} em +{DELTA} °C; "
+            f"{afetadas} linhas do lote mudaram no total"
+        )
+E       AssertionError: temp_media_6h[t=20] mudou 3.3333 °C ao perturbar APENAS t+1..t+123 em +10.0 °C; 29 linhas do lote mudaram no total
+E       assert 3.3333333333333286 == 0.0 ± 1.0e-09
+E         
+E         comparison failed
+E         Obtained: 3.3333333333333286
+E         Expected: 0.0 ± 1.0e-09
+
+tests/test_features.py:145: AssertionError
+___ test_delta_temp_24h_compara_com_a_leitura_de_vinte_e_quatro_horas_antes ____
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D08 — `shift(24)` conta linhas, não horas: após um furo no historiador é outra grandeza")
+    def test_delta_temp_24h_compara_com_a_leitura_de_vinte_e_quatro_horas_antes():
+        """`shift(24)` conta **linhas**, não horas. Com furo no historiador, muda a grandeza."""
+        base = fabrica.lote(n_maquinas=1, n_horas=72, seed=17)
+        com_furo = fabrica.com_furo_no_historiador(base, "M01", a_partir_da_hora=30, horas=5)
+    
+        limpo = sn.preprocessamento.limpar(com_furo)
+        X = sn.features.construir(limpo)
+    
+        posicao = 40
+        instante = limpo["timestamp"].iloc[posicao]
+        alvo = instante - VINTE_E_QUATRO_HORAS
+        casadas = limpo.index[limpo["timestamp"] == alvo]
+        assert len(casadas) == 1, "o instante de referência sumiu do lote"
+    
+        esperado = float(
+            limpo["temperatura_c"].iloc[posicao] - limpo["temperatura_c"].loc[casadas[0]]
+        )
+        obtido = float(X["delta_temp_24h"].iloc[posicao])
+    
+>       assert obtido == pytest.approx(esperado, abs=1e-9), (
+            f"delta_temp_24h em {instante} devolveu {obtido:.4f} °C, mas a diferença real "
+            f"contra {alvo} é {esperado:.4f} °C: com 5 h de furo, `shift(24)` foi buscar "
+            "a leitura de 29 h antes"
+        )
+E       AssertionError: delta_temp_24h em 2026-01-02 21:00:00 devolveu 0.2128 °C, mas a diferença real contra 2026-01-01 21:00:00 é -8.3229 °C: com 5 h de furo, `shift(24)` foi buscar a leitura de 29 h antes
+E       assert 0.21284943623057728 == -8.322856233577639 ± 1.0e-09
+E         
+E         comparison failed
+E         Obtained: 0.21284943623057728
+E         Expected: -8.322856233577639 ± 1.0e-09
+
+tests/test_features.py:175: AssertionError
+__________ test_construir_e_estavel_entre_o_lote_inteiro_e_um_recorte __________
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D09 — `center=True`, `min_periods=1` e `maquina_risco` por lote: reprocessar dá outra resposta")
+    def test_construir_e_estavel_entre_o_lote_inteiro_e_um_recorte():
+        """Reprocessar um pedaço tem de dar a mesma resposta para as linhas em comum.
+    
+        O recorte é **temporal**, não por motor: recortar por motor não expõe nada, porque
+        as janelas já são por motor e `maquina_risco` é calculada dentro do próprio motor.
+        O reprocessamento real da planta é por janela de tempo — "rode as últimas 24 h de
+        novo" — e é aí que a resposta muda.
+        """
+        base = fabrica.lote(n_maquinas=3, n_horas=48, seed=19)
+        limpo = sn.preprocessamento.limpar(base)
+    
+        inteiro = sn.features.construir(limpo)
+    
+        corte = limpo["timestamp"].min() + VINTE_E_QUATRO_HORAS
+        recorte_linhas = limpo.index[limpo["timestamp"] >= corte]
+        recorte = sn.features.construir(limpo.loc[recorte_linhas])
+    
+        diferencas = (inteiro.loc[recorte_linhas] - recorte).abs().max()
+        divergentes = {c: round(float(v), 4) for c, v in diferencas.items() if v > 1e-9}
+    
+>       assert not divergentes, (
+            f"reprocessar as últimas 24 h muda {len(divergentes)} das 13 features das "
+            f"mesmas linhas: {divergentes}"
+        )
+E       AssertionError: reprocessar as últimas 24 h muda 7 das 13 features das mesmas linhas: {'temp_media_6h': 2.3586, 'temp_max_24h': 17.8702, 'delta_temp_24h': 28.9387, 'vib_media_6h': 1.2126, 'vib_max_24h': 3.9664, 'corrente_media_6h': 4.405, 'maquina_risco': 0.0417}
+E       assert not {'temp_media_6h': 2.3586, 'temp_max_24h': 17.8702, 'delta_temp_24h': 28.9387, 'vib_media_6h': 1.2126, ...}
+
+tests/test_features.py:204: AssertionError
+________ test_construir_aceita_indice_duplicado_sem_multiplicar_linhas _________
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D10 — `saida.loc[df.index, …]` com rótulos repetidos multiplica as linhas")
+    def test_construir_aceita_indice_duplicado_sem_multiplicar_linhas():
+        """`pd.concat` de dois lotes é fluxo natural de reprocessamento."""
+        a = sn.preprocessamento.limpar(fabrica.lote(n_maquinas=1, n_horas=24, seed=23))
+        b = sn.preprocessamento.limpar(
+            fabrica.lote(n_maquinas=1, n_horas=24, seed=29, inicio="2026-02-01 00:00:00")
+        )
+        juntos = pd.concat([a, b])  # sem reset_index: o índice se repete
+    
+        X = sn.features.construir(juntos)
+>       assert len(X) == len(juntos), (
+            f"`saida.loc[df.index]` com rótulos repetidos explodiu o quadro: "
+            f"{len(juntos)} linhas de entrada viraram {len(X)}"
+        )
+E       AssertionError: `saida.loc[df.index]` com rótulos repetidos explodiu o quadro: 48 linhas de entrada viraram 96
+E       assert 96 == 48
+E        +  where 96 = len(    temp_media_6h  temp_max_24h  ...  operador_senior  turno\n0       65.944753     55.384694  ...              0.0    ...51338  ...              0.0    1.0\n23      71.526068     84.148906  ...              0.0    2.0\n\n[96 rows x 13 columns])
+E        +  and   48 = len(             timestamp id_maquina  ...  falha_72h operador_cod\n0  2026-01-01 00:00:00        M01  ...          0      ...M01  ...          0            8\n23 2026-02-01 23:00:00        M01  ...          0           10\n\n[48 rows x 14 columns])
+
+tests/test_features.py:221: AssertionError
+__ test_construir_nomeia_a_coluna_faltante_tambem_para_pressao_e_rpm[pressao] __
+
+self = Index(['timestamp', 'id_maquina', 'idade_equipamento_meses', 'id_operador',
+       'turno', 'temperatura_c', 'vibracao...', 'unidade_pressao',
+       'corrente_a', 'rpm', 'horas_operacao', 'falha_72h', 'operador_cod'],
+      dtype='object')
+key = 'pressao'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+>           return self._engine.get_loc(casted_key)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/usr/local/lib/python3.12/site-packages/pandas/core/indexes/base.py:3812: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   KeyError: 'pressao'
+
+pandas/_libs/hashtable_class_helper.pxi:7096: KeyError
+
+The above exception was the direct cause of the following exception:
+
+coluna = 'pressao'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D15 — a checagem de colunas cobre 4 das 11 que `construir` consome; o resto vira KeyError")
+    @pytest.mark.parametrize("coluna", ["pressao", "rpm"])
+    def test_construir_nomeia_a_coluna_faltante_tambem_para_pressao_e_rpm(coluna):
+        """A checagem de colunas cobre 4 das 11 que `construir` consome; o resto vira KeyError."""
+        limpo = sn.preprocessamento.limpar(fabrica.lote(seed=31))
+        with pytest.raises(ValueError, match=coluna):
+>           sn.features.construir(limpo.drop(columns=[coluna]))
+
+tests/test_features.py:234: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/sentinela/src/sentinela/features.py:100: in construir
+    saida["pressao"] = ordenado["pressao"].astype(float)
+                       ^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/site-packages/pandas/core/frame.py:4113: in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Index(['timestamp', 'id_maquina', 'idade_equipamento_meses', 'id_operador',
+       'turno', 'temperatura_c', 'vibracao...', 'unidade_pressao',
+       'corrente_a', 'rpm', 'horas_operacao', 'falha_72h', 'operador_cod'],
+      dtype='object')
+key = 'pressao'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+            return self._engine.get_loc(casted_key)
+        except KeyError as err:
+            if isinstance(casted_key, slice) or (
+                isinstance(casted_key, abc.Iterable)
+                and any(isinstance(x, slice) for x in casted_key)
+            ):
+                raise InvalidIndexError(key)
+>           raise KeyError(key) from err
+E           KeyError: 'pressao'
+
+/usr/local/lib/python3.12/site-packages/pandas/core/indexes/base.py:3819: KeyError
+____ test_construir_nomeia_a_coluna_faltante_tambem_para_pressao_e_rpm[rpm] ____
+
+self = Index(['timestamp', 'id_maquina', 'idade_equipamento_meses', 'id_operador',
+       'turno', 'temperatura_c', 'vibracao...pressao', 'unidade_pressao',
+       'corrente_a', 'horas_operacao', 'falha_72h', 'operador_cod'],
+      dtype='object')
+key = 'rpm'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+>           return self._engine.get_loc(casted_key)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/usr/local/lib/python3.12/site-packages/pandas/core/indexes/base.py:3812: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+pandas/_libs/index.pyx:167: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/index.pyx:196: in pandas._libs.index.IndexEngine.get_loc
+    ???
+pandas/_libs/hashtable_class_helper.pxi:7088: in pandas._libs.hashtable.PyObjectHashTable.get_item
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+>   ???
+E   KeyError: 'rpm'
+
+pandas/_libs/hashtable_class_helper.pxi:7096: KeyError
+
+The above exception was the direct cause of the following exception:
+
+coluna = 'rpm'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D15 — a checagem de colunas cobre 4 das 11 que `construir` consome; o resto vira KeyError")
+    @pytest.mark.parametrize("coluna", ["pressao", "rpm"])
+    def test_construir_nomeia_a_coluna_faltante_tambem_para_pressao_e_rpm(coluna):
+        """A checagem de colunas cobre 4 das 11 que `construir` consome; o resto vira KeyError."""
+        limpo = sn.preprocessamento.limpar(fabrica.lote(seed=31))
+        with pytest.raises(ValueError, match=coluna):
+>           sn.features.construir(limpo.drop(columns=[coluna]))
+
+tests/test_features.py:234: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/sentinela/src/sentinela/features.py:101: in construir
+    saida["rpm"] = ordenado["rpm"].astype(float)
+                   ^^^^^^^^^^^^^^^
+/usr/local/lib/python3.12/site-packages/pandas/core/frame.py:4113: in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Index(['timestamp', 'id_maquina', 'idade_equipamento_meses', 'id_operador',
+       'turno', 'temperatura_c', 'vibracao...pressao', 'unidade_pressao',
+       'corrente_a', 'horas_operacao', 'falha_72h', 'operador_cod'],
+      dtype='object')
+key = 'rpm'
+
+    def get_loc(self, key):
+        """
+        Get integer location, slice or boolean mask for requested label.
+    
+        Parameters
+        ----------
+        key : label
+    
+        Returns
+        -------
+        int if unique index, slice if monotonic index, else mask
+    
+        Examples
+        --------
+        >>> unique_index = pd.Index(list('abc'))
+        >>> unique_index.get_loc('b')
+        1
+    
+        >>> monotonic_index = pd.Index(list('abbc'))
+        >>> monotonic_index.get_loc('b')
+        slice(1, 3, None)
+    
+        >>> non_monotonic_index = pd.Index(list('abcb'))
+        >>> non_monotonic_index.get_loc('b')
+        array([False,  True, False,  True])
+        """
+        casted_key = self._maybe_cast_indexer(key)
+        try:
+            return self._engine.get_loc(casted_key)
+        except KeyError as err:
+            if isinstance(casted_key, slice) or (
+                isinstance(casted_key, abc.Iterable)
+                and any(isinstance(x, slice) for x in casted_key)
+            ):
+                raise InvalidIndexError(key)
+>           raise KeyError(key) from err
+E           KeyError: 'rpm'
+
+/usr/local/lib/python3.12/site-packages/pandas/core/indexes/base.py:3819: KeyError
+___________ test_temperatura_ausente_nao_e_silenciosamente_imputada ____________
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D20 — `min_periods=1` ignora o NaN e transforma buraco de sensor em número confiante")
+    def test_temperatura_ausente_nao_e_silenciosamente_imputada():
+        """`min_periods=1` transforma buraco de sensor em número confiante."""
+        base = fabrica.lote(n_maquinas=1, n_horas=48, seed=37)
+        limpo = sn.preprocessamento.limpar(base)
+        limpo.loc[limpo.index[10:14], "temperatura_c"] = np.nan
+    
+        X = sn.features.construir(limpo)
+        afetadas = X["temp_media_6h"].iloc[10:14]
+    
+>       assert afetadas.isna().all(), (
+            "temperatura ausente virou média finita "
+            f"{[round(v, 3) for v in afetadas.tolist()]}: o buraco do sensor foi imputado "
+            "sem que ninguém pedisse"
+        )
+E       AssertionError: temperatura ausente virou média finita [69.628, 71.502, 75.736, 70.488]: o buraco do sensor foi imputado sem que ninguém pedisse
+E       assert np.False_
+E        +  where np.False_ = all()
+E        +    where all = 10    False\n11    False\n12    False\n13    False\nName: temp_media_6h, dtype: bool.all
+E        +      where 10    False\n11    False\n12    False\n13    False\nName: temp_media_6h, dtype: bool = isna()
+E        +        where isna = 10    69.628336\n11    71.501987\n12    75.736218\n13    70.487693\nName: temp_media_6h, dtype: float64.isna
+
+tests/test_features.py:248: AssertionError
+____________ test_prever_registro_respeita_as_chaves_do_dicionario _____________
+
+modelo = <sentinela.modelo.Modelo object at 0xfc390b247560>
+features =     temp_media_6h  temp_max_24h  ...  operador_senior  turno
+0       68.724283     69.271148  ...              0.0    ...65738  ...              0.0    2.0
+71      72.737079     83.465738  ...              0.0    3.0
+
+[72 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D07 — `prever_registro` monta o vetor por `.values()` e ignora as chaves")
+    def test_prever_registro_respeita_as_chaves_do_dicionario(modelo, features):
+        """O painel manda um dicionário. Se a ordem das chaves mudar, a decisão não pode mudar.
+    
+        `prever_registro` faz `[float(v) for v in registro.values()]` e **ignora as chaves**:
+        um dicionário reordenado vira outro vetor de features, silenciosamente.
+    
+        O teste varre o lote inteiro em vez de olhar uma linha: numa linha só, as duas
+        decisões coincidem por acaso quase metade das vezes e o defeito passa batido.
+        """
+        divergentes = []
+        for i in range(len(features)):
+            registro = features.iloc[i].to_dict()
+            embaralhado = {k: registro[k] for k in reversed(list(registro))}
+            if modelo.prever_registro(registro) != modelo.prever_registro(embaralhado):
+                divergentes.append(i)
+    
+>       assert not divergentes, (
+            f"{len(divergentes)} de {len(features)} leituras "
+            f"({len(divergentes) / len(features):.1%}) mudam de decisão só por reordenar "
+            f"as chaves do dicionário; primeiras: {divergentes[:5]}"
+        )
+E       AssertionError: 39 de 72 leituras (54.2%) mudam de decisão só por reordenar as chaves do dicionário; primeiras: [4, 5, 6, 7, 8]
+E       assert not [4, 5, 6, 7, 8, 9, ...]
+
+tests/test_modelo_contrato.py:88: AssertionError
+________ test_prever_registro_rejeita_dicionario_com_chave_desconhecida ________
+
+modelo = <sentinela.modelo.Modelo object at 0xfc390b247560>
+features =     temp_media_6h  temp_max_24h  ...  operador_senior  turno
+0       68.724283     69.271148  ...              0.0    ...65738  ...              0.0    2.0
+71      72.737079     83.465738  ...              0.0    3.0
+
+[72 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D07 — chave desconhecida entra como feature em vez de virar erro")
+    def test_prever_registro_rejeita_dicionario_com_chave_desconhecida(modelo, features):
+        """Chave inventada tem de virar erro, não predição silenciosa."""
+        registro = features.iloc[0].to_dict()
+        registro.pop("turno")
+        registro["temperatura_media_seis_horas"] = 70.0
+    
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_modelo_contrato.py:103: Failed
+________________ test_pipeline_nao_perde_linhas_silenciosamente ________________
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason=(
+            "D05 — `limpo[limpo['rpm'] >= 1.0]` descarta leituras sem registro: o painel "
+            "mostra menos motores do que o historiador mandou, e ninguém é avisado"
+        ),
+    )
+    def test_pipeline_nao_perde_linhas_silenciosamente():
+        """Lote com rpm inválido: as leituras somem do painel sem deixar rastro."""
+        lote = fabrica.lote(n_maquinas=3, n_horas=48, seed=42)
+        com_invalidas = lote.copy()
+        com_invalidas.loc[com_invalidas.index[:7], "rpm"] = 0.0
+    
+        saida = sn.pipeline.executar(com_invalidas)
+    
+>       assert len(saida) == len(com_invalidas), (
+            f"{len(com_invalidas) - len(saida)} leituras desapareceram entre a entrada e o "
+            "painel, sem nenhum registro auditável do que saiu"
+        )
+E       AssertionError: 7 leituras desapareceram entre a entrada e o painel, sem nenhum registro auditável do que saiu
+E       assert 137 == 144
+E        +  where 137 = len(    id_maquina           timestamp  probabilidade  predicao  falha_72h\n0          M01 2026-01-01 07:00:00       0.2957...345         0          0\n136        M03 2026-01-02 23:00:00       0.463876         0          0\n\n[137 rows x 5 columns])
+E        +  and   144 = len(               timestamp id_maquina  ...  horas_operacao falha_72h\n0    2026-01-01 00:00:00        M01  ...          3....           225.0         0\n143  2026-01-02 23:00:00        M03  ...           226.0         0\n\n[144 rows x 13 columns])
+
+tests/test_pipeline_e2e.py:57: AssertionError
+_________________ test_limpar_converte_pressao_de_psi_para_bar _________________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D03 — `unidade_pressao` é normalizada mas nunca usada: psi entra como se fosse bar")
+    def test_limpar_converte_pressao_de_psi_para_bar(lote):
+        """A mesma pressão física em duas unidades tem de sair igual — Mars Climate Orbiter.
+    
+        O SUT normaliza `unidade_pressao` para minúsculo e nunca a usa para converter.
+        """
+        em_psi = fabrica.com_linhas_em_psi(lote, fracao=1.0, seed=1)
+        limpo = sn.preprocessamento.limpar(em_psi)
+    
+        esperado = ficha.converter_pressao_para_bar(em_psi).to_numpy()
+>       np.testing.assert_allclose(limpo["pressao"].to_numpy(), esperado, rtol=1e-9)
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-09, atol=0
+E       
+E       Mismatched elements: 144 / 144 (100%)
+E       First 5 mismatches are at indices:
+E        [0]: 50.67153778458743 (ACTUAL), 3.4936732294010833 (DESIRED)
+E        [1]: 51.7020714660226 (ACTUAL), 3.5647258970768076 (DESIRED)
+E        [2]: 54.71906123006336 (ACTUAL), 3.7727396427186917 (DESIRED)
+E        [3]: 53.41463244176957 (ACTUAL), 3.6828026063355512 (DESIRED)
+E        [4]: 46.756963012585175 (ACTUAL), 3.223773287868364 (DESIRED)
+E       Max absolute difference among violations: 57.99896846
+E       Max relative difference among violations: 13.5038
+E        ACTUAL: array([50.671538, 51.702071, 54.719061, 53.414632, 46.756963, 59.59497 ,
+E              60.70967 , 48.649719, 55.251352, 48.144397, 57.137199, 50.899014,
+E              56.932707, 58.010763, 58.6753  , 48.131078, 61.026378, 50.085035,...
+E        DESIRED: array([3.493673, 3.564726, 3.77274 , 3.682803, 3.223773, 4.108921,
+E              4.185777, 3.354274, 3.80944 , 3.319433, 3.939464, 3.509357,
+E              3.925365, 3.999694, 4.045512, 3.318515, 4.207613, 3.453235,...
+
+tests/test_preprocessamento.py:78: AssertionError
+_____________ test_limpar_rejeita_unidade_de_pressao_desconhecida ______________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D19 — só `.lower()` em `unidade_pressao`, sem validar o domínio")
+    def test_limpar_rejeita_unidade_de_pressao_desconhecida(lote):
+        """Um CLP novo reportando em kgf/cm² não pode entrar sem aviso."""
+        desconhecida = lote.assign(unidade_pressao="kgf/cm2")
+>       with pytest.raises(ValueError, match="unidade_pressao"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_preprocessamento.py:86: Failed
+____________ test_vibracao_imputada_fica_na_faixa_fisica_do_sensor _____________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D04 — `fillna(0.0)` imputa 0,0 mm/s, fora da faixa física 1,2–8,0 do sensor")
+    def test_vibracao_imputada_fica_na_faixa_fisica_do_sensor(lote):
+        """O SUT imputa 0,0; a ficha diz que o sensor mede 1,2–8,0 mm/s.
+    
+        0,0 mm/s não é "sensor falhou", é "motor parado" — e o modelo lê como medição.
+        """
+        com_buraco = fabrica.com_dropout_de_vibracao(lote, fracao=0.2, seed=3)
+        faltava = com_buraco["vibracao_rms"].isna().to_numpy()
+        limpo = sn.preprocessamento.limpar(com_buraco)
+    
+        imputados = limpo["vibracao_rms"].to_numpy()[faltava[: len(limpo)]]
+        faixa = ficha.FICHA["vibracao_rms"]
+        fora = imputados[(imputados < faixa.minimo) | (imputados > faixa.maximo)]
+>       assert fora.size == 0, (
+            f"{fora.size} valores imputados fora da faixa física "
+            f"[{faixa.minimo}, {faixa.maximo}] mm/s; exemplo: {fora[:3]}"
+        )
+E       AssertionError: 25 valores imputados fora da faixa física [1.2, 8.0] mm/s; exemplo: [0. 0. 0.]
+E       assert 25 == 0
+E        +  where 25 = array([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,\n       0., 0., 0., 0., 0., 0., 0., 0.]).size
+
+tests/test_preprocessamento.py:104: AssertionError
+_______________ test_limpar_nao_descarta_linhas_silenciosamente ________________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D05 — `limpo[limpo['rpm'] >= 1.0]` descarta linhas sem registro auditável")
+    def test_limpar_nao_descarta_linhas_silenciosamente(lote):
+        """Se uma leitura some, tem de haver registro de que sumiu."""
+        com_parado = fabrica.com_leitura_fora_de_faixa(lote, "rpm", 0.5, posicao=0)
+        limpo = sn.preprocessamento.limpar(com_parado)
+>       assert len(limpo) == len(com_parado), (
+            f"{len(com_parado) - len(limpo)} linhas desapareceram sem auditoria"
+        )
+E       AssertionError: 1 linhas desapareceram sem auditoria
+E       assert 143 == 144
+E        +  where 143 = len(              timestamp id_maquina  ...  falha_72h operador_cod\n0   2026-01-01 01:00:00        M01  ...          0    ...3  ...          0            8\n142 2026-01-02 23:00:00        M03  ...          0            8\n\n[143 rows x 14 columns])
+E        +  and   144 = len(               timestamp id_maquina  ...  horas_operacao falha_72h\n0    2026-01-01 00:00:00        M01  ...          3....           225.0         0\n143  2026-01-02 23:00:00        M03  ...           226.0         0\n\n[144 rows x 13 columns])
+
+tests/test_preprocessamento.py:116: AssertionError
+__________ test_limpar_descarta_so_o_que_a_ficha_chama_de_eixo_parado __________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D05 — o corte é em 1,0 rpm, mas a ficha diz que medição válida começa em 1.650")
+    def test_limpar_descarta_so_o_que_a_ficha_chama_de_eixo_parado(lote):
+        """O SUT corta em rpm < 1,0. A ficha diz que medição válida começa em 1.650 rpm.
+    
+        Entre 1,0 e 1.650 há leitura inválida atravessando como se fosse boa.
+        """
+        invalida = fabrica.com_leitura_fora_de_faixa(lote, "rpm", 5.0, posicao=0)
+        limpo = sn.preprocessamento.limpar(invalida)
+>       assert 5.0 not in set(limpo["rpm"].to_numpy()), (
+            "rpm=5 atravessou a limpeza: o SUT só corta abaixo de "
+            f"{sn.preprocessamento.RPM_MINIMO}"
+        )
+E       AssertionError: rpm=5 atravessou a limpeza: o SUT só corta abaixo de 1.0
+E       assert 5.0 not in {np.float64(5.0), np.float64(1660.9508793180921), np.float64(1662.7492421237373), np.float64(1663.2270071338144), np.float64(1665.3231048371435), np.float64(1665.651758061663), ...}
+E        +  where {np.float64(5.0), np.float64(1660.9508793180921), np.float64(1662.7492421237373), np.float64(1663.2270071338144), np.float64(1665.3231048371435), np.float64(1665.651758061663), ...} = set(array([   5.        , 1690.24329646, 1729.00004678, 1738.78205669,\n       1772.80606399, 1738.40393045, 1713.63430401,...54772, 1761.05663273, 1727.29599777, 1723.77902902,\n       1728.8669366 , 1729.75384177, 1716.49320101, 1677.12812828]))
+E        +    where array([   5.        , 1690.24329646, 1729.00004678, 1738.78205669,\n       1772.80606399, 1738.40393045, 1713.63430401,...54772, 1761.05663273, 1727.29599777, 1723.77902902,\n       1728.8669366 , 1729.75384177, 1716.49320101, 1677.12812828]) = to_numpy()
+E        +      where to_numpy = 0         5.000000\n1      1690.243296\n2      1729.000047\n3      1738.782057\n4      1772.806064\n          ...     \n139 ...9029\n140    1728.866937\n141    1729.753842\n142    1716.493201\n143    1677.128128\nName: rpm, Length: 144, dtype: float64.to_numpy
+
+tests/test_preprocessamento.py:130: AssertionError
+_____________ test_limpar_desduplica_a_chave_id_maquina_timestamp ______________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D16 — `limpar` não desduplica `(id_maquina, timestamp)`: reenvio dobra o peso")
+    def test_limpar_desduplica_a_chave_id_maquina_timestamp(lote):
+        """Reenvio do historiador não pode dobrar o peso de uma leitura nas janelas."""
+        reenviado = fabrica.com_leitura_duplicada(lote, posicao=0)
+        limpo = sn.preprocessamento.limpar(reenviado)
+>       assert not limpo.duplicated(["id_maquina", "timestamp"]).any(), (
+            f"{int(limpo.duplicated(['id_maquina', 'timestamp']).sum())} chaves duplicadas "
+            "sobreviveram à limpeza"
+        )
+E       AssertionError: 1 chaves duplicadas sobreviveram à limpeza
+E       assert not np.True_
+E        +  where np.True_ = any()
+E        +    where any = 0      False\n1      False\n2      False\n3      False\n4      False\n       ...  \n140    False\n141    False\n142    False\n143    False\n144     True\nLength: 145, dtype: bool.any
+E        +      where 0      False\n1      False\n2      False\n3      False\n4      False\n       ...  \n140    False\n141    False\n142    False\n143    False\n144     True\nLength: 145, dtype: bool = duplicated(['id_maquina', 'timestamp'])
+E        +        where duplicated =               timestamp id_maquina  ...  falha_72h operador_cod\n0   2026-01-01 00:00:00        M01  ...          1    ...3  ...          0            8\n144 2026-01-01 00:00:00        M01  ...          1           10\n\n[145 rows x 14 columns].duplicated
+
+tests/test_preprocessamento.py:142: AssertionError
+__________ test_limpar_falha_com_mensagem_que_nomeia_a_coluna[turno] ___________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+coluna = 'turno'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D18 — `.astype(int)` sem validação: o erro não nomeia a coluna que quebrou")
+    @pytest.mark.parametrize("coluna", ["turno", "idade_equipamento_meses", "id_operador"])
+    def test_limpar_falha_com_mensagem_que_nomeia_a_coluna(lote, coluna):
+        """Plantão às 3h da manhã: o erro tem de dizer qual coluna quebrou."""
+        quebrado = lote.copy()
+        quebrado.loc[quebrado.index[0], coluna] = np.nan
+>       with pytest.raises(Exception, match=coluna):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'turno'
+E         Actual message: 'Cannot convert non-finite values (NA or inf) to integer'
+
+tests/test_preprocessamento.py:155: AssertionError
+_ test_limpar_falha_com_mensagem_que_nomeia_a_coluna[idade_equipamento_meses] __
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+coluna = 'idade_equipamento_meses'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D18 — `.astype(int)` sem validação: o erro não nomeia a coluna que quebrou")
+    @pytest.mark.parametrize("coluna", ["turno", "idade_equipamento_meses", "id_operador"])
+    def test_limpar_falha_com_mensagem_que_nomeia_a_coluna(lote, coluna):
+        """Plantão às 3h da manhã: o erro tem de dizer qual coluna quebrou."""
+        quebrado = lote.copy()
+        quebrado.loc[quebrado.index[0], coluna] = np.nan
+>       with pytest.raises(Exception, match=coluna):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'idade_equipamento_meses'
+E         Actual message: 'Cannot convert non-finite values (NA or inf) to integer'
+
+tests/test_preprocessamento.py:155: AssertionError
+_______ test_limpar_falha_com_mensagem_que_nomeia_a_coluna[id_operador] ________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+coluna = 'id_operador'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D18 — `.astype(int)` sem validação: o erro não nomeia a coluna que quebrou")
+    @pytest.mark.parametrize("coluna", ["turno", "idade_equipamento_meses", "id_operador"])
+    def test_limpar_falha_com_mensagem_que_nomeia_a_coluna(lote, coluna):
+        """Plantão às 3h da manhã: o erro tem de dizer qual coluna quebrou."""
+        quebrado = lote.copy()
+        quebrado.loc[quebrado.index[0], coluna] = np.nan
+>       with pytest.raises(Exception, match=coluna):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'id_operador'
+E         Actual message: 'cannot convert float NaN to integer'
+
+tests/test_preprocessamento.py:155: AssertionError
+____________ test_limpar_preserva_rastreabilidade_da_linha_original ____________
+
+lote =                timestamp id_maquina  ...  horas_operacao falha_72h
+0    2026-01-01 00:00:00        M01  ...          3....           225.0         0
+143  2026-01-02 23:00:00        M03  ...           226.0         0
+
+[144 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D22 — `reset_index(drop=True)` descarta a rastreabilidade da linha de origem")
+    def test_limpar_preserva_rastreabilidade_da_linha_original(lote):
+        """`reset_index(drop=True)` joga fora a única chance de auditar o que saiu.
+    
+        Só aparece quando alguma linha é de fato descartada: com o lote inteiro sobrevivendo,
+        o índice reconstruído coincide com o original por acidente e o defeito fica invisível.
+        """
+        com_invalida = fabrica.com_leitura_fora_de_faixa(lote, "rpm", 0.5, posicao=10)
+        sobreviventes = com_invalida.index[
+            com_invalida["rpm"] >= sn.preprocessamento.RPM_MINIMO
+        ]
+        limpo = sn.preprocessamento.limpar(com_invalida)
+    
+>       assert "indice_origem" in limpo.columns or limpo.index.equals(sobreviventes), (
+            "não há como casar a linha de saída com a de entrada: o índice foi reconstruído "
+            f"como {type(limpo.index).__name__} 0..{len(limpo) - 1} e nenhuma coluna de "
+            "origem foi preservada"
+        )
+E       AssertionError: não há como casar a linha de saída com a de entrada: o índice foi reconstruído como RangeIndex 0..142 e nenhuma coluna de origem foi preservada
+E       assert ('indice_origem' in Index(['timestamp', 'id_maquina', 'idade_equipamento_meses', 'id_operador',\n       'turno', 'temperatura_c', 'vibracao...', 'unidade_pressao',\n       'corrente_a', 'rpm', 'horas_operacao', 'falha_72h', 'operador_cod'],\n      dtype='object') or False)
+E        +  where Index(['timestamp', 'id_maquina', 'idade_equipamento_meses', 'id_operador',\n       'turno', 'temperatura_c', 'vibracao...', 'unidade_pressao',\n       'corrente_a', 'rpm', 'horas_operacao', 'falha_72h', 'operador_cod'],\n      dtype='object') =               timestamp id_maquina  ...  falha_72h operador_cod\n0   2026-01-01 00:00:00        M01  ...          1    ...3  ...          0            8\n142 2026-01-02 23:00:00        M03  ...          0            8\n\n[143 rows x 14 columns].columns
+E        +  and   False = equals(Index([  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,\n       ...\n       134, 135, 136, 137, 138, 139, 140, 141, 142, 143],\n      dtype='int64', length=143))
+E        +    where equals = RangeIndex(start=0, stop=143, step=1).equals
+E        +      where RangeIndex(start=0, stop=143, step=1) =               timestamp id_maquina  ...  falha_72h operador_cod\n0   2026-01-01 00:00:00        M01  ...          1    ...3  ...          0            8\n142 2026-01-02 23:00:00        M03  ...          0            8\n\n[143 rows x 14 columns].index
+
+tests/test_preprocessamento.py:173: AssertionError
+_____________________ test_artefatos_batem_com_o_manifest ______________________
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(
+        strict=True,
+        reason=(
+            "D23 — manifest desatualizado no commit pinado: o sha256 dos três CSVs de "
+            "dados/ e de artefatos/risco_maquina.json não bate com artefatos/manifest.json"
+        ),
+    )
+    def test_artefatos_batem_com_o_manifest():
+        """O README do SUT promete `[]`; o commit pinado entrega quatro divergências.
+    
+        Verificado em clone limpo (`git status --porcelain` vazio), portanto é defeito
+        do SUT e não do nosso ambiente: os dados e a tabela de risco foram regerados
+        sem que o manifest fosse reescrito. Os dois artefatos de modelo, esses, batem
+        — é o que distingue D23 de uma corrupção de clone.
+        """
+>       assert sn.artefatos.verificar_manifest() == []
+E       AssertionError: assert ['sha256 dife...maquina.json'] == []
+E         
+E         Left contains 4 more items, first extra item: 'sha256 diferente: dados/treino.csv'
+E         Use -v to get more diff
+
+tests/test_reprodutibilidade.py:64: AssertionError
+_______ test_probabilidade_do_pipeline_nao_muda_se_o_rotulo_for_removido _______
+
+lote_teste =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-01 00:00:00        M01  ...         ...         7319.0         0
+4199  2026-06-07 23:00:00        M25  ...         16559.0         0
+
+[4200 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D02 — `maquina_risco` é recalculada do rótulo: remover `falha_72h` muda a probabilidade")
+    def test_probabilidade_do_pipeline_nao_muda_se_o_rotulo_for_removido(lote_teste):
+        """O teste que derruba a promoção da v2.
+    
+        Remover uma coluna que o serving não terá não pode mudar a probabilidade. Se muda, a
+        métrica publicada mediu outra coisa que não o desempenho em produção.
+        """
+        _, com, _ = harness.prever_com_vazamento(lote_teste, "v2")
+        _, sem, _ = harness.prever_sem_vazamento(lote_teste, "v2")
+    
+        diferentes = int((com != sem).sum())
+>       assert diferentes == 0, (
+            f"{diferentes} de {len(com)} probabilidades mudam ao remover a coluna `falha_72h`; "
+            f"|Δ| máximo = {np.abs(com - sem).max():.4f}"
+        )
+E       AssertionError: 3217 de 4200 probabilidades mudam ao remover a coluna `falha_72h`; |Δ| máximo = 0.5767
+E       assert 3217 == 0
+
+tests/test_vazamento_alvo.py:48: AssertionError
+___________ test_maquina_risco_nao_depende_do_rotulo_do_proprio_lote ___________
+
+lote_teste =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-01 00:00:00        M01  ...         ...         7319.0         0
+4199  2026-06-07 23:00:00        M25  ...         16559.0         0
+
+[4200 rows x 13 columns]
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D02 — a feature é a média de `falha_72h` do grupo quando a coluna está presente")
+    def test_maquina_risco_nao_depende_do_rotulo_do_proprio_lote(lote_teste):
+        """A feature tem de ser a mesma com e sem o rótulo no quadro."""
+        com = harness.maquina_risco(lote_teste, vazar=True)
+        sem = harness.maquina_risco(lote_teste, vazar=False)
+    
+>       assert np.array_equal(com, sem), (
+            f"`maquina_risco` difere em {int((com != sem).sum())} de {len(com)} linhas; "
+            f"|Δ| máximo = {np.abs(com - sem).max():.6f}"
+        )
+E       AssertionError: `maquina_risco` difere em 4200 de 4200 linhas; |Δ| máximo = 0.415178
+E       assert False
+E        +  where False = <function array_equal at 0xfc3927f91430>(array([0.42261905, 0.        , 0.        , ..., 0.        , 0.23214286,\n       0.        ], shape=(4200,)), array([0.108631, 0.214286, 0.135417, ..., 0.107143, 0.049107, 0.107143],\n      shape=(4200,)))
+E        +    where <function array_equal at 0xfc3927f91430> = np.array_equal
+
+tests/test_vazamento_alvo.py:61: AssertionError
+_____________ test_maquina_risco_fica_na_faixa_da_tabela_congelada _____________
+
+lote_teste =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-01 00:00:00        M01  ...         ...         7319.0         0
+4199  2026-06-07 23:00:00        M25  ...         16559.0         0
+
+[4200 rows x 13 columns]
+tabela_congelada = {'M01': 0.108631, 'M02': 0.214286, 'M03': 0.135417, 'M04': 0.165179, ...}
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D02 — o valor recalculado (máx. 0,428571) escapa do teto da tabela congelada (0,214286)")
+    def test_maquina_risco_fica_na_faixa_da_tabela_congelada(lote_teste, tabela_congelada):
+        """O valor recalculado escapa da faixa que o modelo viu no treino.
+    
+        A tabela congelada é o que a planta teria em mãos. Um valor fora dela é uma feature que o
+        modelo nunca encontrou durante o treino — extrapolação silenciosa no ponto de serving.
+        """
+        valores = np.array(list(tabela_congelada.values()), dtype=float)
+        teto = float(valores.max())
+        com = harness.maquina_risco(lote_teste, vazar=True)
+    
+        excedem = int((com > teto + 1e-9).sum())
+>       assert excedem == 0, (
+            f"{excedem} de {len(com)} linhas têm `maquina_risco` acima do teto da tabela congelada "
+            f"({teto:.6f}); máximo observado = {com.max():.6f}"
+        )
+E       AssertionError: 1512 de 4200 linhas têm `maquina_risco` acima do teto da tabela congelada (0.214286); máximo observado = 0.428571
+E       assert 1512 == 0
+
+tests/test_vazamento_alvo.py:80: AssertionError
+____________ test_revisar_o_rotulo_do_lote_nao_muda_a_predicao[v1] _____________
+
+lote_teste =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-01 00:00:00        M01  ...         ...         7319.0         0
+4199  2026-06-07 23:00:00        M25  ...         16559.0         0
+
+[4200 rows x 13 columns]
+versao = 'v1'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D02 — rever o gabarito do lote muda a predição de leituras que não mudaram")
+    @pytest.mark.parametrize("versao", ["v1", "v2"])
+    def test_revisar_o_rotulo_do_lote_nao_muda_a_predicao(lote_teste, versao):
+        """Rever o gabarito de um lote não pode mexer na predição das mesmas leituras.
+    
+        O cenário é o do próprio SUT: o README descreve `producao` como o lote "rotulado **depois**
+        pela equipe". Rever rótulos é operação normal — e o modelo, que já rodou, não pode mudar de
+        opinião sobre leituras que não mudaram.
+    
+        Aqui 21 das 168 leituras de M02 passam a constar como falha. **Nenhum sensor é tocado.**
+    
+        Dois cuidados que este teste aprendeu na marra, ambos registrados em `docs/mapa-defeitos.md`:
+    
+        - **Assertar probabilidade, não decisão.** Com 2 rótulos revistos as probabilidades já se
+          movem; a primeira decisão só vira com 21. Um oráculo de decisão binária dá o defeito por
+          inexistente numa faixa larga.
+        - **Renomear o motor não serve de experimento.** `maquina_risco` é a média **do grupo**;
+          renomear o grupo inteiro preserva a média, e partir o grupo mexe nas janelas móveis — o que
+          mediria D09, não D02. Mexer só na coluna de rótulo isola o mecanismo.
+        """
+        revisado = lote_teste.copy()
+        do_motor = revisado.index[revisado["id_maquina"] == "M02"]
+        revisado.loc[do_motor[:21], "falha_72h"] = 1
+    
+        intocadas = ["timestamp", "id_maquina", "temperatura_c", "vibracao_rms", "pressao",
+                     "corrente_a", "rpm", "horas_operacao", "id_operador", "turno"]
+        assert revisado[intocadas].equals(lote_teste[intocadas])
+    
+        _, antes, _ = harness.prever_com_vazamento(lote_teste, versao)
+        _, depois, _ = harness.prever_com_vazamento(revisado, versao)
+    
+        mudaram = int((antes != depois).sum())
+>       assert mudaram == 0, (
+            f"{versao}: rever 21 de 168 rótulos de M02, sem tocar em nenhum sensor, mudou "
+            f"{mudaram} de {len(antes)} probabilidades; |Δ| máximo = "
+            f"{np.abs(antes - depois).max():.6f}"
+        )
+E       AssertionError: v1: rever 21 de 168 rótulos de M02, sem tocar em nenhum sensor, mudou 168 de 4200 probabilidades; |Δ| máximo = 0.244217
+E       assert 168 == 0
+
+tests/test_vazamento_alvo.py:119: AssertionError
+____________ test_revisar_o_rotulo_do_lote_nao_muda_a_predicao[v2] _____________
+
+lote_teste =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-01 00:00:00        M01  ...         ...         7319.0         0
+4199  2026-06-07 23:00:00        M25  ...         16559.0         0
+
+[4200 rows x 13 columns]
+versao = 'v2'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D02 — rever o gabarito do lote muda a predição de leituras que não mudaram")
+    @pytest.mark.parametrize("versao", ["v1", "v2"])
+    def test_revisar_o_rotulo_do_lote_nao_muda_a_predicao(lote_teste, versao):
+        """Rever o gabarito de um lote não pode mexer na predição das mesmas leituras.
+    
+        O cenário é o do próprio SUT: o README descreve `producao` como o lote "rotulado **depois**
+        pela equipe". Rever rótulos é operação normal — e o modelo, que já rodou, não pode mudar de
+        opinião sobre leituras que não mudaram.
+    
+        Aqui 21 das 168 leituras de M02 passam a constar como falha. **Nenhum sensor é tocado.**
+    
+        Dois cuidados que este teste aprendeu na marra, ambos registrados em `docs/mapa-defeitos.md`:
+    
+        - **Assertar probabilidade, não decisão.** Com 2 rótulos revistos as probabilidades já se
+          movem; a primeira decisão só vira com 21. Um oráculo de decisão binária dá o defeito por
+          inexistente numa faixa larga.
+        - **Renomear o motor não serve de experimento.** `maquina_risco` é a média **do grupo**;
+          renomear o grupo inteiro preserva a média, e partir o grupo mexe nas janelas móveis — o que
+          mediria D09, não D02. Mexer só na coluna de rótulo isola o mecanismo.
+        """
+        revisado = lote_teste.copy()
+        do_motor = revisado.index[revisado["id_maquina"] == "M02"]
+        revisado.loc[do_motor[:21], "falha_72h"] = 1
+    
+        intocadas = ["timestamp", "id_maquina", "temperatura_c", "vibracao_rms", "pressao",
+                     "corrente_a", "rpm", "horas_operacao", "id_operador", "turno"]
+        assert revisado[intocadas].equals(lote_teste[intocadas])
+    
+        _, antes, _ = harness.prever_com_vazamento(lote_teste, versao)
+        _, depois, _ = harness.prever_com_vazamento(revisado, versao)
+    
+        mudaram = int((antes != depois).sum())
+>       assert mudaram == 0, (
+            f"{versao}: rever 21 de 168 rótulos de M02, sem tocar em nenhum sensor, mudou "
+            f"{mudaram} de {len(antes)} probabilidades; |Δ| máximo = "
+            f"{np.abs(antes - depois).max():.6f}"
+        )
+E       AssertionError: v2: rever 21 de 168 rótulos de M02, sem tocar em nenhum sensor, mudou 168 de 4200 probabilidades; |Δ| máximo = 0.080209
+E       assert 168 == 0
+
+tests/test_vazamento_alvo.py:119: AssertionError
+_______________ test_metricas_com_e_sem_vazamento_sao_iguais[v1] _______________
+
+lote_teste =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-01 00:00:00        M01  ...         ...         7319.0         0
+4199  2026-06-07 23:00:00        M25  ...         16559.0         0
+
+[4200 rows x 13 columns]
+versao = 'v1'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D02 — o vazamento infla recall, F2 e PR-AUC; no teste a PR-AUC da v1 sobe 28,68 pp")
+    @pytest.mark.parametrize("versao", ["v1", "v2"])
+    def test_metricas_com_e_sem_vazamento_sao_iguais(lote_teste, versao):
+        """Δrecall, ΔF2 e ΔPR-AUC têm de ser zero. O que sobra é a inflação."""
+        y, proba_com, pred_com = harness.prever_com_vazamento(lote_teste, versao)
+        _, proba_sem, pred_sem = harness.prever_sem_vazamento(lote_teste, versao)
+    
+        d_recall = sn.avaliacao.metricas(y, pred_com)["recall"] - sn.avaliacao.metricas(y, pred_sem)["recall"]
+        d_f2 = metricas.fbeta(y, pred_com, 2.0) - metricas.fbeta(y, pred_sem, 2.0)
+        d_prauc = metricas.average_precision(y, proba_com) - metricas.average_precision(y, proba_sem)
+    
+>       assert (abs(d_recall), abs(d_f2), abs(d_prauc)) == pytest.approx((0.0, 0.0, 0.0), abs=1e-9), (
+            f"{versao}: o vazamento infla Δrecall={100*d_recall:+.2f} pp, ΔF2={100*d_f2:+.2f} pp, "
+            f"ΔPR-AUC={100*d_prauc:+.2f} pp"
+        )
+E       AssertionError: v1: o vazamento infla Δrecall=+0.46 pp, ΔF2=+10.41 pp, ΔPR-AUC=+28.68 pp
+E       assert (0.0045801526...1985846253844) == approx((0.0 ±....0 ± 1.0e-09))
+E         
+E         comparison failed. Mismatched elements: 3 / 3:
+E         Max absolute difference: 0.28681985846253844
+E         Max relative difference: 1.0
+E         Index | Obtained             | Expected     
+E         0     | 0.004580152671755711 | 0.0 ± 1.0e-09
+E         1     | 0.10414556273951125  | 0.0 ± 1.0e-09
+E         2     | 0.28681985846253844  | 0.0 ± 1.0e-09
+
+tests/test_vazamento_alvo.py:138: AssertionError
+_______________ test_metricas_com_e_sem_vazamento_sao_iguais[v2] _______________
+
+lote_teste =                 timestamp id_maquina  ...  horas_operacao falha_72h
+0     2026-06-01 00:00:00        M01  ...         ...         7319.0         0
+4199  2026-06-07 23:00:00        M25  ...         16559.0         0
+
+[4200 rows x 13 columns]
+versao = 'v2'
+
+    @pytest.mark.defeito
+    @pytest.mark.xfail(strict=True, reason="D02 — o vazamento infla recall, F2 e PR-AUC; no teste a PR-AUC da v1 sobe 28,68 pp")
+    @pytest.mark.parametrize("versao", ["v1", "v2"])
+    def test_metricas_com_e_sem_vazamento_sao_iguais(lote_teste, versao):
+        """Δrecall, ΔF2 e ΔPR-AUC têm de ser zero. O que sobra é a inflação."""
+        y, proba_com, pred_com = harness.prever_com_vazamento(lote_teste, versao)
+        _, proba_sem, pred_sem = harness.prever_sem_vazamento(lote_teste, versao)
+    
+        d_recall = sn.avaliacao.metricas(y, pred_com)["recall"] - sn.avaliacao.metricas(y, pred_sem)["recall"]
+        d_f2 = metricas.fbeta(y, pred_com, 2.0) - metricas.fbeta(y, pred_sem, 2.0)
+        d_prauc = metricas.average_precision(y, proba_com) - metricas.average_precision(y, proba_sem)
+    
+>       assert (abs(d_recall), abs(d_f2), abs(d_prauc)) == pytest.approx((0.0, 0.0, 0.0), abs=1e-9), (
+            f"{versao}: o vazamento infla Δrecall={100*d_recall:+.2f} pp, ΔF2={100*d_f2:+.2f} pp, "
+            f"ΔPR-AUC={100*d_prauc:+.2f} pp"
+        )
+E       AssertionError: v2: o vazamento infla Δrecall=+11.60 pp, ΔF2=+14.12 pp, ΔPR-AUC=+13.99 pp
+E       assert (0.1160305343...2657359894356) == approx((0.0 ±....0 ± 1.0e-09))
+E         
+E         comparison failed. Mismatched elements: 3 / 3:
+E         Max absolute difference: 0.14121450179714157
+E         Max relative difference: 1.0
+E         Index | Obtained            | Expected     
+E         0     | 0.11603053435114508 | 0.0 ± 1.0e-09
+E         1     | 0.14121450179714157 | 0.0 ± 1.0e-09
+E         2     | 0.13992657359894356 | 0.0 ± 1.0e-09
+
+tests/test_vazamento_alvo.py:138: AssertionError
+--------- generated xml file: /trabalho/evidencias/junit-defeitos.xml ----------
+===================== 61 failed, 170 deselected in 10.97s ======================
+exit=1

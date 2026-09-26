@@ -1,0 +1,13 @@
+diff --git a/src/sentinela/features.py b/src/sentinela/features.py
+index f3fcede..5d9796e 100644
+--- a/src/sentinela/features.py
++++ b/src/sentinela/features.py
+@@ -76,7 +76,7 @@ def construir(df: pd.DataFrame) -> pd.DataFrame:
+ 
+     temperatura = por_maquina["temperatura_c"]
+     saida["temp_media_6h"] = temperatura.transform(
+-        lambda s: s.rolling(JANELA_CURTA, center=True, min_periods=1).mean()
++        lambda s: s.rolling(JANELA_CURTA, min_periods=1).mean()
+     )
+     saida["temp_max_24h"] = temperatura.transform(
+         lambda s: s.rolling(JANELA_LONGA, min_periods=1).max()

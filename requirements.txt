@@ -1,0 +1,11 @@
+# Dependências da SUÍTE, pinadas com `==` para build reproduzível (SPEC NF3).
+# O SUT é instalado com `--no-deps` para que os `>=` dele não subam nada daqui.
+#
+# pandas fica na linha 2.x de propósito: as janelas móveis do SUT dependem da
+# versão (SPEC P6) e os artefatos do SUT são dessa era. Subir para 3.x é uma
+# mudança rastreável, não um efeito colateral de build.
+numpy==2.5.3
+pandas==2.3.3
+scipy==1.18.1
+pytest==9.1.1
+hypothesis==6.168.1

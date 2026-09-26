@@ -1,0 +1,72 @@
+=== correcoes.sh — aplica os patches e mede o antes/depois ===
+SUT=/opt/sentinela  PATCHES=/trabalho/patches
+
+--- [1/5] métricas ANTES (SUT no commit pinado, com os defeitos presentes)
+ok
+
+--- [2/5] aplicando os patches
+  aplicado: D01-vazamento-temporal.patch
+  aplicado: D02-vazamento-alvo.patch
+  aplicado: D03-unidade-de-pressao.patch
+3 patches aplicados
+
+--- [3/5] o manifest continua nas 4 divergências de D23?
+  ok: exatamente as 4 divergências catalogadas em D23, nenhuma a mais
+
+--- [4/5] re-rodando -m defeito com os patches aplicados
+        """O README do SUT promete `[]`; o commit pinado entrega quatro divergências.
+    
+        Verificado em clone limpo (`git status --porcelain` vazio), portanto é defeito
+        do SUT e não do nosso ambiente: os dados e a tabela de risco foram regerados
+        sem que o manifest fosse reescrito. Os dois artefatos de modelo, esses, batem
+        — é o que distingue D23 de uma corrupção de clone.
+        """
+>       assert sn.artefatos.verificar_manifest() == []
+E       AssertionError: assert ['sha256 dife...maquina.json'] == []
+E         
+E         Left contains 4 more items, first extra item: 'sha256 diferente: dados/treino.csv'
+E         Use -v to get more diff
+
+tests/test_reprodutibilidade.py:64: AssertionError
+47 failed, 14 passed, 170 deselected in 10.86s
+
+    Os testes de D01, D02, D03 e D19, nominalmente:
+      PASSA  test_features.py::test_temp_media_6h_nao_muda_quando_so_o_futuro_muda
+      PASSA  test_vazamento_alvo.py::test_maquina_risco_nao_depende_do_rotulo_do_proprio_lote
+      PASSA  test_preprocessamento.py::test_limpar_converte_pressao_de_psi_para_bar
+      PASSA  test_preprocessamento.py::test_limpar_rejeita_unidade_de_pressao_desconhecida
+
+--- [5/5] métricas DEPOIS, e a tabela antes/depois
+
+  conjunto TESTE, sem vazamento, limiar 0,5 — custo = 20*FN + FP
+
+  versão  métrica           antes       depois   Δ (depois−antes)
+  ---------------------------------------------------------------
+  v1      recall         0.937405     0.934351          -0.003053
+  v1      precisao       0.393842     0.392811          -0.001031
+  v1      f2             0.734626     0.732408          -0.002218
+  v1      pr_auc         0.581091     0.605164          +0.024073
+  v1      custo              1765         1806                +41
+  v1      linhas             4200         4200                 +0
+
+  v2      recall         0.697710     0.697710          +0.000000
+  v2      precisao       0.513483     0.536385          +0.022902
+  v2      f2             0.650997     0.658122          +0.007125
+  v2      pr_auc         0.671808     0.696078          +0.024270
+  v2      custo              4393         4355                -38
+  v2      linhas             4200         4200                 +0
+
+  LEITURA
+  O custo PIOROU em: v1. **Isso é o achado, não um bug da correção.**
+  Os artefatos de modelo foram treinados COM os defeitos presentes: a floresta aprendeu a
+  usar `maquina_risco` inflada pelo rótulo e a pressão em duas escalas misturadas. Corrigir
+  a entrada sem retreinar entrega ao modelo uma distribuição que ele nunca viu.
+
+  Corrigir o código exige retreinar. E retreinar exige, antes, esta suíte — porque sem ela
+  não há como saber se o modelo novo é melhor que o velho.
+
+--- revertendo o clone (o container é descartado de qualquer forma)
+clone limpo: o pacote sob teste não foi alterado de forma persistente (C12/V11)
+
+=== correcoes.sh: OK — 3 patches aplicados ===
+exit=0

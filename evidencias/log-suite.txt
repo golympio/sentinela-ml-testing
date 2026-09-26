@@ -1,0 +1,92 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+SUT: /opt/sentinela @ c9020d7ba3bb4e6fd4ae22d46346a787b16adc02 (sentinela 1.0.0)
+versões: numpy=2.5.3 pandas=2.3.3 pytest=9.1.1 scipy=1.18.1
+SUITE_SEED=42 SUITE_N_BOOT=2000
+rootdir: /trabalho
+configfile: pyproject.toml
+testpaths: tests
+plugins: hypothesis-6.168.1
+collected 231 items
+
+tests/test_adversarial.py xxx..xxx.xxxxxx.                               [  6%]
+tests/test_adversarial_limites.py ..xxxxx                                [  9%]
+tests/test_contrato_dados.py ........................................... [ 28%]
+........x.xx.x...................                                        [ 42%]
+tests/test_estatistico_drift.py ...x...                                  [ 45%]
+tests/test_estatistico_limiar_calibracao.py ..xx.x.xxxxxx                [ 51%]
+tests/test_estatistico_v1_v2.py ..x....x..                               [ 55%]
+tests/test_features.py .........xxxxxxx                                  [ 62%]
+tests/test_modelo_contrato.py .....xx                                    [ 65%]
+tests/test_pipeline_e2e.py .x                                            [ 66%]
+tests/test_preprocessamento.py .....xxxxxxxxxx                           [ 73%]
+tests/test_propriedades.py ......                                        [ 75%]
+tests/test_reprodutibilidade.py x....                                    [ 77%]
+tests/test_suite_interna.py ...........................................  [ 96%]
+tests/test_vazamento_alvo.py xxxxxxx.                                    [100%]
+
+----------- generated xml file: /trabalho/evidencias/junit-suite.xml -----------
+=========================== short test summary info ============================
+XFAIL tests/test_adversarial.py::test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao[0.1] - D14 — a decisão muda com perturbação abaixo do ruído de ±1,0 °C do sensor
+XFAIL tests/test_adversarial.py::test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao[0.2] - D14 — a decisão muda com perturbação abaixo do ruído de ±1,0 °C do sensor
+XFAIL tests/test_adversarial.py::test_perturbacao_menor_que_o_ruido_do_sensor_nao_muda_a_decisao[0.4] - D14 — a decisão muda com perturbação abaixo do ruído de ±1,0 °C do sensor
+XFAIL tests/test_adversarial.py::test_v2_nao_e_mais_instavel_que_a_v1[0.1] - D14 — a v2 vira mais decisões que a v1 sob a mesma perturbação sub-ruído
+XFAIL tests/test_adversarial.py::test_v2_nao_e_mais_instavel_que_a_v1[0.2] - D14 — a v2 vira mais decisões que a v1 sob a mesma perturbação sub-ruído
+XFAIL tests/test_adversarial.py::test_v2_nao_e_mais_instavel_que_a_v1[0.4] - D14 — a v2 vira mais decisões que a v1 sob a mesma perturbação sub-ruído
+XFAIL tests/test_adversarial.py::test_trocar_o_operador_senior_nao_muda_a_decisao - D06 — trocar o técnico de plantão, sem tocar em sensor, faz alarme sumir
+XFAIL tests/test_adversarial.py::test_trocar_o_turno_nao_muda_a_decisao[1] - D24 — `turno` é função da hora do timestamp e ainda assim move a decisão: até 10 flips sem confundidor (faixa de 0,71 p.p. entre turnos)
+XFAIL tests/test_adversarial.py::test_trocar_o_turno_nao_muda_a_decisao[2] - D24 — `turno` é função da hora do timestamp e ainda assim move a decisão: até 10 flips sem confundidor (faixa de 0,71 p.p. entre turnos)
+XFAIL tests/test_adversarial.py::test_trocar_o_turno_nao_muda_a_decisao[3] - D24 — `turno` é função da hora do timestamp e ainda assim move a decisão: até 10 flips sem confundidor (faixa de 0,71 p.p. entre turnos)
+XFAIL tests/test_adversarial.py::test_converter_a_pressao_para_a_outra_unidade_nao_muda_a_decisao - D03 — a mesma pressão física em psi e em bar produz decisões diferentes
+XFAIL tests/test_adversarial.py::test_dropout_de_vibracao_nao_muda_as_decisoes_da_janela - D04 — a constante que imputa a vibração ausente decide ordens de manutenção
+XFAIL tests/test_adversarial_limites.py::test_lote_com_uma_linha_nao_produz_maquina_risco_degenerado - D15 — num lote de uma linha `maquina_risco` vira o próprio rótulo
+XFAIL tests/test_adversarial_limites.py::test_lote_vazio_levanta_erro_claro - D15 — lote vazio devolve quadro vazio em silêncio, sem erro claro
+XFAIL tests/test_adversarial_limites.py::test_leitura_fisicamente_impossivel_e_rejeitada_antes_da_inferencia - D21 — o serving aceita leitura fora da faixa física e emite probabilidade
+XFAIL tests/test_adversarial_limites.py::test_lote_com_leitura_duplicada_nao_dobra_o_peso_na_janela - D16 — leitura reenviada dobra o peso na janela móvel
+XFAIL tests/test_adversarial_limites.py::test_painel_de_um_registro_concorda_com_o_lote - D15 — o painel de um registro discorda do lote e perde o alarme
+XFAIL tests/test_contrato_dados.py::test_rpm_esta_na_faixa_da_ficha[treino] - D17 — `limpar` não valida faixa: há rpm acima de 1.800 atravessando o pipeline
+XFAIL tests/test_contrato_dados.py::test_rpm_esta_na_faixa_da_ficha[producao] - D17 — `limpar` não valida faixa: há rpm acima de 1.800 atravessando o pipeline
+XFAIL tests/test_contrato_dados.py::test_pressao_convertida_esta_na_faixa_da_ficha[treino] - D17 — `limpar` não valida faixa: há pressão fora de 3,0–4,5 bar mesmo após converter psi
+XFAIL tests/test_contrato_dados.py::test_pressao_convertida_esta_na_faixa_da_ficha[producao] - D17 — `limpar` não valida faixa: há pressão fora de 3,0–4,5 bar mesmo após converter psi
+XFAIL tests/test_estatistico_drift.py::test_distribuicoes_de_entrada_sao_as_mesmas_entre_teste_e_producao - D13 — 5 das 6 colunas de sensor mudaram de distribuição e a média não acusa nenhuma
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_limiar_0_5_maximiza_f2[v1] - D11 — o 0,5 do sistema não maximiza F2: v2 tem ótimo em 0,20 (+0,0865 de F2)
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_limiar_0_5_maximiza_f2[v2] - D11 — o 0,5 do sistema não maximiza F2: v2 tem ótimo em 0,20 (+0,0865 de F2)
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_limiar_de_custo_minimo_e_0_5[v2] - D11 — herdar o limiar 0,5 da v1 custa 2.605 a mais na v2 (4.393 contra 1.788)
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_ece_por_versao_fica_abaixo_de_cinco_pontos[v1] - D12 — ECE de 19,06 p.p. (v1) e 5,76 p.p. (v2) contra o teto de 5 p.p.
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_ece_por_versao_fica_abaixo_de_cinco_pontos[v2] - D12 — ECE de 19,06 p.p. (v1) e 5,76 p.p. (v2) contra o teto de 5 p.p.
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_curva_de_confiabilidade_e_monotona[v1] - D12 — a frequência observada cai ao subir de faixa: 3 quebras na v1, 1 na v2
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_curva_de_confiabilidade_e_monotona[v2] - D12 — a frequência observada cai ao subir de faixa: 3 quebras na v1, 1 na v2
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_probabilidade_media_prevista_bate_com_a_frequencia_observada_por_faixa[v1] - D12 — superconfiança nas 20 faixas: gap máximo 0,4227 (v1) e 0,3140 (v2)
+XFAIL tests/test_estatistico_limiar_calibracao.py::test_probabilidade_media_prevista_bate_com_a_frequencia_observada_por_faixa[v2] - D12 — superconfiança nas 20 faixas: gap máximo 0,4227 (v1) e 0,3140 (v2)
+XFAIL tests/test_estatistico_v1_v2.py::test_v2_nao_regride_recall_em_relacao_a_v1 - D11 — a v2 perde 23,97 pp de recall: 157 falhas reais a mais que a v1 deixa passar
+XFAIL tests/test_estatistico_v1_v2.py::test_pr_auc_da_v2_nao_e_pior_que_a_da_v1[producao] - D11 — em produção a PR-AUC da v2 fica 0,54 pp abaixo da v1
+XFAIL tests/test_features.py::test_temp_media_6h_nao_muda_quando_so_o_futuro_muda - D01 — `rolling(6, center=True)` faz a janela ser [t-2, t+3]: a feature de agora usa leitura que a planta só terá em 3 h
+XFAIL tests/test_features.py::test_delta_temp_24h_compara_com_a_leitura_de_vinte_e_quatro_horas_antes - D08 — `shift(24)` conta linhas, não horas: após um furo no historiador é outra grandeza
+XFAIL tests/test_features.py::test_construir_e_estavel_entre_o_lote_inteiro_e_um_recorte - D09 — `center=True`, `min_periods=1` e `maquina_risco` por lote: reprocessar dá outra resposta
+XFAIL tests/test_features.py::test_construir_aceita_indice_duplicado_sem_multiplicar_linhas - D10 — `saida.loc[df.index, …]` com rótulos repetidos multiplica as linhas
+XFAIL tests/test_features.py::test_construir_nomeia_a_coluna_faltante_tambem_para_pressao_e_rpm[pressao] - D15 — a checagem de colunas cobre 4 das 11 que `construir` consome; o resto vira KeyError
+XFAIL tests/test_features.py::test_construir_nomeia_a_coluna_faltante_tambem_para_pressao_e_rpm[rpm] - D15 — a checagem de colunas cobre 4 das 11 que `construir` consome; o resto vira KeyError
+XFAIL tests/test_features.py::test_temperatura_ausente_nao_e_silenciosamente_imputada - D20 — `min_periods=1` ignora o NaN e transforma buraco de sensor em número confiante
+XFAIL tests/test_modelo_contrato.py::test_prever_registro_respeita_as_chaves_do_dicionario - D07 — `prever_registro` monta o vetor por `.values()` e ignora as chaves
+XFAIL tests/test_modelo_contrato.py::test_prever_registro_rejeita_dicionario_com_chave_desconhecida - D07 — chave desconhecida entra como feature em vez de virar erro
+XFAIL tests/test_pipeline_e2e.py::test_pipeline_nao_perde_linhas_silenciosamente - D05 — `limpo[limpo['rpm'] >= 1.0]` descarta leituras sem registro: o painel mostra menos motores do que o historiador mandou, e ninguém é avisado
+XFAIL tests/test_preprocessamento.py::test_limpar_converte_pressao_de_psi_para_bar - D03 — `unidade_pressao` é normalizada mas nunca usada: psi entra como se fosse bar
+XFAIL tests/test_preprocessamento.py::test_limpar_rejeita_unidade_de_pressao_desconhecida - D19 — só `.lower()` em `unidade_pressao`, sem validar o domínio
+XFAIL tests/test_preprocessamento.py::test_vibracao_imputada_fica_na_faixa_fisica_do_sensor - D04 — `fillna(0.0)` imputa 0,0 mm/s, fora da faixa física 1,2–8,0 do sensor
+XFAIL tests/test_preprocessamento.py::test_limpar_nao_descarta_linhas_silenciosamente - D05 — `limpo[limpo['rpm'] >= 1.0]` descarta linhas sem registro auditável
+XFAIL tests/test_preprocessamento.py::test_limpar_descarta_so_o_que_a_ficha_chama_de_eixo_parado - D05 — o corte é em 1,0 rpm, mas a ficha diz que medição válida começa em 1.650
+XFAIL tests/test_preprocessamento.py::test_limpar_desduplica_a_chave_id_maquina_timestamp - D16 — `limpar` não desduplica `(id_maquina, timestamp)`: reenvio dobra o peso
+XFAIL tests/test_preprocessamento.py::test_limpar_falha_com_mensagem_que_nomeia_a_coluna[turno] - D18 — `.astype(int)` sem validação: o erro não nomeia a coluna que quebrou
+XFAIL tests/test_preprocessamento.py::test_limpar_falha_com_mensagem_que_nomeia_a_coluna[idade_equipamento_meses] - D18 — `.astype(int)` sem validação: o erro não nomeia a coluna que quebrou
+XFAIL tests/test_preprocessamento.py::test_limpar_falha_com_mensagem_que_nomeia_a_coluna[id_operador] - D18 — `.astype(int)` sem validação: o erro não nomeia a coluna que quebrou
+XFAIL tests/test_preprocessamento.py::test_limpar_preserva_rastreabilidade_da_linha_original - D22 — `reset_index(drop=True)` descarta a rastreabilidade da linha de origem
+XFAIL tests/test_reprodutibilidade.py::test_artefatos_batem_com_o_manifest - D23 — manifest desatualizado no commit pinado: o sha256 dos três CSVs de dados/ e de artefatos/risco_maquina.json não bate com artefatos/manifest.json
+XFAIL tests/test_vazamento_alvo.py::test_probabilidade_do_pipeline_nao_muda_se_o_rotulo_for_removido - D02 — `maquina_risco` é recalculada do rótulo: remover `falha_72h` muda a probabilidade
+XFAIL tests/test_vazamento_alvo.py::test_maquina_risco_nao_depende_do_rotulo_do_proprio_lote - D02 — a feature é a média de `falha_72h` do grupo quando a coluna está presente
+XFAIL tests/test_vazamento_alvo.py::test_maquina_risco_fica_na_faixa_da_tabela_congelada - D02 — o valor recalculado (máx. 0,428571) escapa do teto da tabela congelada (0,214286)
+XFAIL tests/test_vazamento_alvo.py::test_revisar_o_rotulo_do_lote_nao_muda_a_predicao[v1] - D02 — rever o gabarito do lote muda a predição de leituras que não mudaram
+XFAIL tests/test_vazamento_alvo.py::test_revisar_o_rotulo_do_lote_nao_muda_a_predicao[v2] - D02 — rever o gabarito do lote muda a predição de leituras que não mudaram
+XFAIL tests/test_vazamento_alvo.py::test_metricas_com_e_sem_vazamento_sao_iguais[v1] - D02 — o vazamento infla recall, F2 e PR-AUC; no teste a PR-AUC da v1 sobe 28,68 pp
+XFAIL tests/test_vazamento_alvo.py::test_metricas_com_e_sem_vazamento_sao_iguais[v2] - D02 — o vazamento infla recall, F2 e PR-AUC; no teste a PR-AUC da v1 sobe 28,68 pp
+======================= 170 passed, 61 xfailed in 31.09s =======================
+exit=0

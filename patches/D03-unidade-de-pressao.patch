@@ -1,0 +1,38 @@
+diff --git a/src/sentinela/preprocessamento.py b/src/sentinela/preprocessamento.py
+index 8c0cc08..2dbec32 100644
+--- a/src/sentinela/preprocessamento.py
++++ b/src/sentinela/preprocessamento.py
+@@ -10,6 +10,11 @@ import pandas as pd
+ VIBRACAO_PADRAO = 0.0
+ RPM_MINIMO = 1.0
+ 
++# 1 bar = 14.5038 psi. O historiador entrega as duas escalas na MESMA coluna
++# `pressao`, distinguidas só por `unidade_pressao` (D03).
++FATOR_PSI_POR_BAR = 14.5038
++UNIDADES_PRESSAO = frozenset({"bar", "psi"})
++
+ 
+ def limpar(df: pd.DataFrame) -> pd.DataFrame:
+     """Limpa um lote de leituras. Não modifica o quadro de entrada."""
+@@ -20,6 +25,21 @@ def limpar(df: pd.DataFrame) -> pd.DataFrame:
+     limpo["id_operador"] = limpo["id_operador"].astype(str).str.strip().str.upper()
+     limpo["unidade_pressao"] = limpo["unidade_pressao"].astype(str).str.strip().str.lower()
+ 
++    # D19: normalizar o rótulo não é validá-lo. Uma unidade desconhecida
++    # entrava como se fosse bar, em silêncio.
++    desconhecidas = sorted(set(limpo["unidade_pressao"]) - UNIDADES_PRESSAO)
++    if desconhecidas:
++        raise ValueError(
++            f"coluna 'unidade_pressao' com valor fora do dominio {sorted(UNIDADES_PRESSAO)}: "
++            f"{desconhecidas}"
++        )
++
++    # D03: a unidade era normalizada e nunca usada, entao 32% do historico
++    # entrava em psi como se fosse bar — valores 14,5x maiores.
++    em_psi = limpo["unidade_pressao"] == "psi"
++    limpo.loc[em_psi, "pressao"] = limpo.loc[em_psi, "pressao"] / FATOR_PSI_POR_BAR
++    limpo.loc[em_psi, "unidade_pressao"] = "bar"
++
+     # Motor parado não é leitura válida: o historiador registra a linha, mas
+     # não há o que prever enquanto o eixo não gira.
+     limpo = limpo[limpo["rpm"] >= RPM_MINIMO]

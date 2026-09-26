@@ -1,0 +1,56 @@
+# Cinco serviços (SPEC C2). Nenhuma porta é publicada: a suíte não sobe
+# serviço, ela roda e sai.
+name: sentinela-ml-testing
+
+x-comum: &comum
+  build:
+    context: .
+    args:
+      SUITE_UID: ${SUITE_UID:-1001}
+      SUITE_GID: ${SUITE_GID:-1001}
+      SENTINELA_REPO: ${SENTINELA_REPO:-https://github.com/felipehp/sentinela-nortemec}
+      SENTINELA_REF: ${SENTINELA_REF:-c9020d7ba3bb4e6fd4ae22d46346a787b16adc02}
+  image: sentinela-ml-testing:local
+  working_dir: /trabalho
+  volumes:
+    - .:/trabalho
+    - ./evidencias:/trabalho/evidencias
+  environment:
+    SUITE_SEED: ${SUITE_SEED:-42}
+    SUITE_N_BOOT: ${SUITE_N_BOOT:-1000}
+    SUITE_MEDICOES: ${SUITE_MEDICOES:-/trabalho/evidencias/medicoes.json}
+  init: true
+
+services:
+  # Suíte completa. Sai 0 (SPEC C1).
+  suite:
+    <<: *comum
+    command: ["pytest"]
+
+  # Só os testes de defeito, com --runxfail: cada um falha de verdade,
+  # mostrando o assert e o número medido. Sai 1 (SPEC S5).
+  defeitos:
+    <<: *comum
+    command: ["pytest", "-m", "defeito", "--runxfail"]
+
+  # Aplica patches/*.patch no clone DENTRO do container e re-roda -m defeito.
+  # O script chega no HANDOFF 06; o serviço já existe para fechar o contrato.
+  correcoes:
+    <<: *comum
+    command: ["bash", "scripts/correcoes.sh"]
+
+  # Regenera tudo em evidencias/. n_boot maior (SPEC C6).
+  evidencias:
+    <<: *comum
+    environment:
+      SUITE_SEED: ${SUITE_SEED:-42}
+      SUITE_N_BOOT: ${SUITE_N_BOOT:-2000}
+      SUITE_MEDICOES: ${SUITE_MEDICOES:-/trabalho/evidencias/medicoes.json}
+    command: ["bash", "scripts/evidencias.sh"]
+
+  # Inspeção manual.
+  shell:
+    <<: *comum
+    command: ["bash"]
+    stdin_open: true
+    tty: true

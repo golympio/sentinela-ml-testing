@@ -1,0 +1,32 @@
+# Configuração do pytest da suíte. Este repositório não é um pacote
+# publicável: o único pacote instalado é o SUT, em modo editável, dentro do
+# container (ver Dockerfile).
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+
+# `-rxX` lista cada XFAIL/XPASS com o seu reason (SPEC S4).
+# `--strict-markers` derruba marker não registrado; `--strict-config`, opção
+# de config inválida. junitxml NÃO entra aqui: cada alvo do Makefile passa o
+# seu próprio caminho, senão um log sobrescreveria o outro (SPEC C7).
+addopts = "-rxX --strict-markers --strict-config"
+
+# Um defeito corrigido vira XPASS e derruba a suíte — o alarme de que a
+# especificação do defeito ficou obsoleta (SPEC S10).
+xfail_strict = true
+
+filterwarnings = ["error::FutureWarning"]
+
+# Os oito markers de SPEC C4. Todo teste carrega exatamente um marker de
+# bloco: unitario | estatistico | adversarial | meta.
+markers = [
+  "unitario: bloco A — testes unitários do pipeline",
+  "estatistico: bloco B — incerteza, limiar, calibração e drift",
+  "adversarial: bloco C — perturbação, contrafactual e casos-limite",
+  "propriedade: teste baseado em propriedade (hypothesis)",
+  "defeito: expõe um defeito real do SUT; pareia com xfail(strict=True)",
+  "meta: testa os helpers da própria suíte",
+  "rapido: entra em `make rapido`",
+  "lento: excluído de `make rapido`",
+]
